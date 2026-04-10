@@ -1,17 +1,19 @@
+// ================================================================
+// IccShell.tsx
+// ================================================================
 import { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
+import IccNavbar from "./IccNavbar";
+import IccFooter from "./IccFooter";
+import ScrollToTop from "@/components/icc/ScrollToTop";
 
-import SiteFooter from "@/components/iesf/SiteFooter";
-import SiteNavbar from "@/components/iesf/SiteNavbar";
-import ScrollToTop from "@/components/iesf/ScrollToTop";
-
-type SiteShellProps = {
+type IccShellProps = {
   children: ReactNode;
   showFooter?: boolean;
 };
 
-const SiteShell = ({ children, showFooter = true }: SiteShellProps) => {
+const IccShell = ({ children, showFooter = true }: IccShellProps) => {
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
@@ -23,11 +25,10 @@ const SiteShell = ({ children, showFooter = true }: SiteShellProps) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-       <ScrollToTop />
-      <div className="absolute inset-0 tech-grid pointer-events-none opacity-30" aria-hidden="true" />
-      <SiteNavbar />
+      <ScrollToTop />
+      <IccNavbar />
       <main className="relative">{children}</main>
-      {showFooter ? <SiteFooter /> : null}
+      {showFooter && <IccFooter />}
 
       <motion.button
         type="button"
@@ -35,7 +36,8 @@ const SiteShell = ({ children, showFooter = true }: SiteShellProps) => {
         animate={{ opacity: showTop ? 1 : 0, y: showTop ? 0 : 20, pointerEvents: showTop ? "auto" : "none" }}
         transition={{ duration: 0.25 }}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-6 right-6 z-50 rounded-full border border-border bg-surface p-3 text-primary shadow-glow backdrop-blur-xl"
+        className="fixed bottom-6 right-6 z-50 rounded-full border border-border bg-surface p-3 text-primary shadow-lg backdrop-blur-xl"
+        style={{ boxShadow: "var(--shadow-glow)" }}
         aria-label="Scroll to top"
       >
         <ArrowUp className="h-5 w-5" />
@@ -44,4 +46,4 @@ const SiteShell = ({ children, showFooter = true }: SiteShellProps) => {
   );
 };
 
-export default SiteShell;
+export default IccShell;

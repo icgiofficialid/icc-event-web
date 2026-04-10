@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 
-import SectionReveal from "@/components/iesf/SectionReveal";
+import SectionReveal from "@/components/icc/SectionReveal";
 
 type PageHeroProps = {
   eyebrow: string;

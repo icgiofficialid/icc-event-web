@@ -1,8 +1,8 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
-import SiteShell from "@/components/iesf/SiteShell";
-import SectionReveal from "@/components/iesf/SectionReveal";
-import { events } from "@/components/iesf/eventsData";
+import SiteShell from "@/components/iesf/iccShell";
+import SectionReveal from "@/components/icc/SectionReveal";
+import { events } from "@/components/icc/iccEventsData";
 
 const PastEvents = () => {
   const [search, setSearch] = useState("");

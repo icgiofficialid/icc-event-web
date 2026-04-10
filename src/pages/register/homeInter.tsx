@@ -1,6 +1,6 @@
 import { Monitor, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { type CompetitionType } from "./registerConfig";
+import { type CompetitionType } from "./iccRegisterConfig";
 import { useLang } from "@/components/LanguageProvider";
 
 interface Props {

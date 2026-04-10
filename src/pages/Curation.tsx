@@ -1,4 +1,4 @@
-import SiteShell from "@/components/iesf/SiteShell";
+import SiteShell from "@/components/icc/IccShell";
 import { Button } from "@/components/ui/button";
 
 const Curation = () => {

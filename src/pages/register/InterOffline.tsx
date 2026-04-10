@@ -1,4 +1,4 @@
-import TermsBox from "./TermsBox";
+import TermsBox from "./IccTermsBox";
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbylqhWttZ6pjomknohOmLNlBUC-JAu1KxdElZUBiFZrSZ_uQQqwKKrD3Q1eVgdY_0no/exec";
 interface Props {

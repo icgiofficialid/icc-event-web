@@ -1,6 +1,6 @@
 import { Globe, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { type ParticipantType } from "./registerConfig";
+import { type ParticipantType } from "./iccRegisterConfig";
 import { useLang } from "@/components/LanguageProvider";
 
 interface Props {

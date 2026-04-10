@@ -7,25 +7,25 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 
 // Existing pages
-import About from "./pages/About.tsx";
-import Contact from "./pages/Contact.tsx";
+import About from "./pages/IccAbout.tsx";
+import Contact from "./pages/IccContact.tsx";
 import Curation from "./pages/Curation.tsx";
-import Faq from "./pages/Faq.tsx";
-import Galery from "./pages/Galery.tsx";
-import Index from "./pages/Index.tsx";
-import MediaCoverage from "./pages/MediaCoverage.tsx";
+import Faq from "./pages/IccFaq.tsx";
+// import Galery from "./pages/Galery.tsx";
+import Index from "./pages/IccIndex.tsx";
+// import MediaCoverage from "./pages/MediaCoverage.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import Sertifikat from "./pages/Sertifikat.tsx";
+// import Sertifikat from "./pages/Sertifikat.tsx";
 import Terms from "@/pages/data/Terms.tsx";
 import Guide from "@/pages/guide";
-import Register from "@/pages/Register.tsx";
+import Register from "@/pages/IccRegister.tsx";
 
 // New event portal pages
-import UpcomingEvents from "./pages/UpcomingEvents";
+import UpcomingEvents from "./pages/IccUpcomingEvents.tsx";
 import PastEvents from "./pages/PastEvents";
-import YIESFDetail from "./pages/events/YIESFDetail";
+import YIESFDetail from "./pages/events/YICCDetail.tsx";
 import { Scroll } from "lucide-react";
-import ScrollToTop from "./components/iesf/ScrollToTop.tsx";
+import ScrollToTop from "./components/icc/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
 
@@ -49,9 +49,9 @@ const App = () => (
 
               {/* Existing pages */}
               <Route path="/about" element={<About />} />
-              <Route path="/sertifikat" element={<Sertifikat />} />
-              <Route path="/media-coverage" element={<MediaCoverage />} />
-              <Route path="/galery" element={<Galery />} />
+              {/* <Route path="/sertifikat" element={<Sertifikat />} /> */}
+              {/* <Route path="/media-coverage" element={<MediaCoverage />} /> */}
+              {/* <Route path="/galery" element={<Galery />} /> */}
               <Route path="/curation" element={<Curation />} />
               <Route path="/faq" element={<Faq />} />
               <Route path="/contact" element={<Contact />} />

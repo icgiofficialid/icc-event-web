@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SiteShell from "@/components/iesf/SiteShell";
-import { type ParticipantType, type CompetitionType } from "./register/registerConfig";
+import SiteShell from "@/components/icc/IccShell";
+import { type ParticipantType, type CompetitionType } from "./register/iccRegisterConfig";
 import HomeRegist       from "./register/homeregist";
 import HomeIndo         from "./register/homeIndo";
 import HomeInter        from "./register/homeInter";
@@ -8,7 +8,7 @@ import IndoOnline       from "./register/IndoOnline";
 import IndoOffline      from "./register/IndoOffline";
 import InterOnline      from "./register/InterOnline";
 import InterOffline     from "./register/InterOffline";
-import RegistrationForm from "./register/RegistrationForm";
+import RegistrationForm from "./register/iccRegistrationForm";
 import { useNavigate } from "react-router-dom";
 
 type Step = 1 | 2 | 3 | 4;

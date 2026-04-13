@@ -3,7 +3,7 @@
 // ================================================================
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { type ParticipantType, type CompetitionType } from "./register/iccRegisterConfig";
+import { type ParticipantType, type CompetitionType } from "./iccRegisterConfig";
 import { useLang } from "@/components/LanguageProvider";
 
 interface Props {

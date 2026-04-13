@@ -46,8 +46,7 @@ const IccUpcomingEvents = () => {
               value={search} onChange={e => setSearch(e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-5 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 transition"
               style={{ "--tw-ring-color": "hsl(38 95% 55% / 0.3)" } as React.CSSProperties} />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white"
-              style={{ background: "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))" }}>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white bg-primary">
               <Search className="h-4 w-4" />
             </div>
           </div>

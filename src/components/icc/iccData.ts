@@ -216,7 +216,7 @@ export const domesticSongs = [
 // ── FAQ ───────────────────────────────────────────────────────────
 export const faqItems = [
   {
-    question: { en: "Who can join YICC?",         id: "Siapa yang bisa mengikuti YICC?" },
+    question: { en: "Who can join ICC?",         id: "Siapa yang bisa mengikuti ICC?" },
     answer:   { en: "YICC is open to primary/elementary school students (7–12), junior high (13–15), senior high (16–18), and open division (university, communities, cultural studios) with no age limit.", id: "YICC terbuka untuk siswa SD (7–12 tahun), SMP (13–15 tahun), SMA/SMK (16–18 tahun), dan divisi terbuka (universitas, komunitas, sanggar budaya) tanpa batasan usia." },
   },
   {

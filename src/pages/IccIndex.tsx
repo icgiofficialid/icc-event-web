@@ -63,24 +63,39 @@ const EventCard = ({ event, index }: { event: typeof iccEvents[0]; index: number
         onClick={() => navigate(`/events/${event.slug}`)}
         className="cursor-pointer group h-full"
       >
-        <div className="relative rounded-2xl overflow-hidden h-full border border-border/80 bg-surface transition-all duration-400 group-hover:border-foreground/30"
-          style={{ boxShadow: "0 8px 48px hsl(0 0% 0% / 0.5)" }}>
-          {/* Top gradient */}
+        <div
+          className="relative rounded-2xl overflow-hidden h-full transition-all duration-300 group-hover:scale-[1.01]"
+          style={{
+            boxShadow: "0 12px 56px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,200,80,0.12)",
+            border: "1px solid rgba(255,180,60,0.18)",
+          }}
+        >
+          {/* Card face — fixed warm gradient, theme-independent */}
           <div
             className="relative aspect-[3/4] flex flex-col justify-between p-5"
             style={{
-              background: "linear-gradient(160deg, hsl(0 0% 10%) 0%, hsl(0 0% 5%) 100%)",
+              background: `
+                radial-gradient(ellipse at 25% 15%, rgba(255,200,80,0.28) 0%, transparent 50%),
+                radial-gradient(ellipse at 75% 80%, rgba(200,40,60,0.35) 0%, transparent 50%),
+                linear-gradient(160deg, #1a1208 0%, #100a0a 50%, #0e0509 100%)
+              `,
             }}
           >
-            {/* Watermark */}
+            {/* Watermark snowflake */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-foreground">
-                <SnowflakeMark size={130} opacity={0.04} />
-              </div>
+              <SnowflakeMark size={130} opacity={0.05} className="text-amber-300" />
             </div>
 
+            {/* Subtle top vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "linear-gradient(180deg, rgba(255,180,60,0.06) 0%, transparent 40%, rgba(160,20,40,0.12) 100%)",
+              }}
+            />
+
             {/* Noise overlay */}
-            <div className="absolute inset-0 opacity-[0.04]"
+            <div className="absolute inset-0 opacity-[0.06]"
               style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }} />
 
             {/* Top row */}
@@ -137,35 +152,62 @@ const EventPopup = ({ onClose }: { onClose: () => void }) => {
       className="fixed bottom-6 right-4 sm:right-6 z-50 w-64 sm:w-72"
     >
       <div
-        className="rounded-2xl border border-border/80 overflow-hidden"
-        style={{ background: "hsl(0 0% 8% / 0.95)", backdropFilter: "blur(20px)" }}
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: "#ffffff",
+          border: "1px solid rgba(0,0,0,0.10)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)",
+        }}
       >
-        {/* Top accent */}
-        <div className="h-px bg-foreground/40" />
+        {/* Top accent bar — warm gold-crimson sesuai card */}
+        <div
+          className="h-[3px]"
+          style={{
+            background: "linear-gradient(90deg, #f59e0b 0%, #ef4444 60%, transparent 100%)",
+          }}
+        />
         <div className="p-4 cursor-pointer group" onClick={() => { navigate("/events/yicc"); onClose(); }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-foreground opacity-60" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-foreground" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#ef4444" }} />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#ef4444" }} />
               </span>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">New Event</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: "#6b7280" }}>New Event</span>
             </div>
-            <button onClick={e => { e.stopPropagation(); onClose(); }} className="text-muted-foreground hover:text-foreground">
+            <button
+              onClick={e => { e.stopPropagation(); onClose(); }}
+              className="rounded-lg p-1 transition-colors hover:bg-gray-100"
+              style={{ color: "#9ca3af" }}
+            >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
+
           <div className="space-y-1">
-            <p className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">Cultural Competition · 2026</p>
+            <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "#9ca3af" }}>
+              Cultural Competition · 2026
+            </p>
             <p
-              className="text-lg font-medium text-foreground leading-tight"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
-            >YICC 2026</p>
-            <p className="text-xs text-muted-foreground">Yogyakarta, Indonesia</p>
+              className="text-xl font-semibold leading-tight"
+              style={{ fontFamily: "'Cormorant Garamond', serif", color: "#111827", fontWeight: 600 }}
+            >
+              YICC 2026
+            </p>
+            <p className="text-xs" style={{ color: "#6b7280" }}>Yogyakarta, Indonesia</p>
           </div>
-          <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-foreground/80">Registration open</span>
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-foreground transition-all">
+
+          <div
+            className="mt-3 pt-3 flex items-center justify-between"
+            style={{ borderTop: "1px solid #f3f4f6" }}
+          >
+            <span className="text-[11px] font-semibold" style={{ color: "#111827" }}>
+              Registration open
+            </span>
+            <span
+              className="flex items-center gap-1 text-[11px] font-medium transition-all group-hover:gap-2"
+              style={{ color: "#6b7280" }}
+            >
               View <ArrowRight className="h-3 w-3" />
             </span>
           </div>
@@ -435,6 +477,23 @@ const IccIndex = () => {
               {LABELS.allEvents[lang]} <ArrowRight className="h-4 w-4" />
             </motion.button>
           </motion.div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.8, duration: 0.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
+          <span className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
+            {LABELS.scrollLabel[lang]}
+          </span>
+          <motion.div
+            className="w-px h-10 bg-gradient-to-b from-foreground/30 to-transparent"
+            animate={{ scaleY: [1, 0.4, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
         </motion.div>
       </section>
 

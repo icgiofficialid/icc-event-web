@@ -108,7 +108,10 @@ const IccTermsBox = ({ participant, competition, sheetUrl, sheetTarget, onBack, 
           </Button>
           <Button
             size="lg" className="w-full sm:w-auto font-bold text-white"
-            style={{ background: agreed ? "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))" : undefined }}
+            style={{
+                  background: "hsl(var(--foreground))",
+                  color: "hsl(var(--primary-foreground))",
+                }}
             disabled={!agreed}
             onClick={() => onNext(sheetUrl, sheetTarget)}
           >

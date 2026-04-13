@@ -3,7 +3,7 @@
 // ================================================================
 
 import { type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export const ICC_WHATSAPP_ADMIN = "628139905880";
@@ -166,10 +166,7 @@ export const SectionTitle = ({ title }: { title: string }) => (
 export const SuccessOverlay = () => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
     <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center gap-4 text-center shadow-xl">
-      <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
-        style={{ background: "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))" }}>
-        🌸
-      </div>
+      <Check className="text-green-500" />
       <h2 className="text-xl font-bold text-foreground font-display">Registration Submitted!</h2>
       <p className="text-sm text-muted-foreground">LoA will be sent to your email within 3 working days.</p>
     </div>

@@ -86,7 +86,7 @@ const IccFooter = () => {
                   International Cultural Competition
                 </p>
                 <p className="text-[10px] uppercase tracking-[0.22em] mt-0.5 text-muted-foreground">
-                  by ICGI · Yogyakarta, Indonesia
+                  by ICGI · Indonesia
                 </p>
               </div>
             </div>

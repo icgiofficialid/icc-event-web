@@ -23,7 +23,7 @@ import register from "@/pages/IccRegister.tsx";
 // New event portal pages
 import UpcomingEvents from "./pages/IccUpcomingEvents.tsx";
 import PastEvents from "./pages/PastEvents";
-import YICCFDetail from "./pages/YICCDetail.tsx";
+import YICCFDetail from "./pages/events/YICCDetail.tsx";
 import { Scroll } from "lucide-react";
 import ScrollToTop from "./components/icc/ScrollToTop.tsx";
 import IccAbout from "./pages/IccAbout.tsx";

@@ -109,7 +109,7 @@ const YICCDetail = () => {
                 onClick={() => navigate("/register")}
                 className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm hover:brightness-110 transition-all"
                 style={{ background: "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))", color: "#fff" }}>
-                🌸 {LABELS.registerBtn[lang]}
+                {LABELS.registerBtn[lang]}
               </button>
               <a href="/guide" className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 transition-all">
                 <FileText className="h-4 w-4" /> {LABELS.guideBtn[lang]}
@@ -296,7 +296,7 @@ const YICCDetail = () => {
         </SectionReveal>
         <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
           {[
-            { icon: "💃", title: { en: "Dance Categories", id: "Kategori Tari" }, docs: docsByCategory.dance },
+            { icon: "🕺", title: { en: "Dance Categories", id: "Kategori Tari" }, docs: docsByCategory.dance },
             { icon: "👘", title: { en: "Costume Show",     id: "Pertunjukan Kostum" }, docs: docsByCategory.costume },
             { icon: "🎤", title: { en: "Traditional Song", id: "Lagu Tradisional" }, docs: docsByCategory.vocal },
           ].map(({ icon, title, docs }, i) => (
@@ -324,8 +324,11 @@ const YICCDetail = () => {
           <button
             onClick={() => navigate("/register")}
             className="inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-bold hover:brightness-110 hover:scale-[1.02] transition-all"
-            style={{ background: "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))", color: "#fff" }}>
-            🌸 {LABELS.registerBtn[lang]}
+                style={{
+                  background: "hsl(var(--foreground))",
+                  color: "hsl(var(--primary-foreground))",
+                }}>
+             {LABELS.registerBtn[lang]}
           </button>
         </SectionReveal>
       </section>

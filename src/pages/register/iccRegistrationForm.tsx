@@ -82,7 +82,7 @@ const IccRegistrationForm = ({ participant, competition, sheetUrl, sheetTarget, 
         {/* Info banner */}
         <div className="rounded-xl p-4 text-sm text-muted-foreground leading-6"
           style={{ background: "hsl(38 95% 55% / 0.06)", border: "1px solid hsl(38 95% 55% / 0.2)" }}>
-          <p className="font-semibold text-foreground mb-1">🌸 YICC 2026 — {participant === "international" ? LABELS.intl[lang] : LABELS.indo[lang]} Participant</p>
+          <p className="font-semibold text-foreground mb-1">YICC 2026 —  {participant === "international" ? LABELS.intl[lang] : LABELS.indo[lang]} Participant</p>
           <ol className="list-decimal list-inside space-y-1">
             <li>{lang === "en" ? "Fill in data correctly. Submitted data is final." : "Isi data dengan benar. Data yang dikirim bersifat final."}</li>
             <li>{lang === "en" ? "All technical files (music, etc.) must be submitted H-14 before event." : "Semua file teknis (musik, dll.) harus dikirim H-14 sebelum acara."}</li>
@@ -245,11 +245,11 @@ const IccRegistrationForm = ({ participant, competition, sheetUrl, sheetTarget, 
         <div className="pt-2">
           <Button
             className="w-full text-base py-4 font-bold tracking-widest uppercase text-white"
-            style={{ background: isFormValid && !loading ? "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))" : undefined }}
+            style={{ background: isFormValid && !loading ? "hsl(var(--foreground))" : undefined }}
             disabled={!isFormValid || loading}
             onClick={handleSubmit}
           >
-            {loading ? (lang === "en" ? "Submitting..." : "Mengirim...") : `🌸 ${lang === "en" ? "Submit Form" : "Kirim Formulir"}`}
+            {loading ? (lang === "en" ? "Submitting..." : "Mengirim...") : ` ${lang === "en" ? "Submit Form" : "Kirim Formulir"}`}
           </Button>
         </div>
       </div>

@@ -18,14 +18,19 @@ import NotFound from "./pages/NotFound.tsx";
 // import Sertifikat from "./pages/Sertifikat.tsx";
 import Terms from "@/pages/data/Terms.tsx";
 import Guide from "@/pages/guide";
-import Register from "@/pages/IccRegister.tsx";
+import register from "@/pages/IccRegister.tsx";
 
 // New event portal pages
 import UpcomingEvents from "./pages/IccUpcomingEvents.tsx";
 import PastEvents from "./pages/PastEvents";
-import YIESFDetail from "./pages/events/YICCDetail.tsx";
+import YICCFDetail from "./pages/YICCDetail.tsx";
 import { Scroll } from "lucide-react";
 import ScrollToTop from "./components/icc/ScrollToTop.tsx";
+import IccAbout from "./pages/IccAbout.tsx";
+import IccFaq from "./pages/IccFaq.tsx";
+import IccContact from "./pages/IccContact.tsx";
+import IccUpcomingEvents from "./pages/IccUpcomingEvents.tsx";
+import IccRegister from "@/pages/IccRegister.tsx";
 
 const queryClient = new QueryClient();
 
@@ -43,21 +48,21 @@ const App = () => (
               <Route path="/" element={<Index />} />
 
               {/* Event Portal */}
-              <Route path="/events" element={<UpcomingEvents />} />
+              <Route path="/events" element={<IccUpcomingEvents />} />
               <Route path="/past-events" element={<PastEvents />} />
-              <Route path="/events/yiesf" element={<YIESFDetail />} />
+              <Route path="/events/yicc" element={<YICCFDetail />} />
 
               {/* Existing pages */}
-              <Route path="/about" element={<About />} />
+              <Route path="/about" element={<IccAbout />} />
               {/* <Route path="/sertifikat" element={<Sertifikat />} /> */}
               {/* <Route path="/media-coverage" element={<MediaCoverage />} /> */}
               {/* <Route path="/galery" element={<Galery />} /> */}
               <Route path="/curation" element={<Curation />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<IccFaq />} />
+              <Route path="/contact" element={<IccContact />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/guide" element={<Guide />} />
-              <Route path="/Register" element={<Register />} />
+              <Route path="/register" element={<IccRegister />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -1,33 +1,43 @@
 // ================================================================
-// registerConfig.ts
+// iccRegisterConfig.tsx — ICC Registration Config
 // ================================================================
 
 import { type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-export const WHATSAPP_ADMIN = "628139905880";
+export const ICC_WHATSAPP_ADMIN = "628139905880";
 
 export type ParticipantType = "international" | "indonesian";
 export type CompetitionType = "online" | "offline";
 export type FormData = Record<string, string>;
+
+// Competition categories from YICC guidebook
+export const COMPETITION_CATEGORIES = [
+  "Traditional / Cultural-Based Dance Solo",
+  "Traditional / Cultural-Based Dance Group",
+  "Ethnic / Cultural Creative Costume Show",
+  "Traditional Song Solo",
+];
+
+export const PARTICIPANT_DIVISIONS = ["Elementary", "Junior High", "Senior High", "Open Division (University/Community/Studio)"];
 
 export const REQUIRED_FIELDS = [
   "NAMA_LENGKAP",
   "LEADER_WHATSAPP",
   "LEADER_EMAIL",
   "NAMA_SEKOLAH",
-  "GRADE",
+  "DIVISION",
   "NAME_SUPERVISOR",
   "WHATSAPP_NUMBER_SUPERVISOR",
   "EMAIL_TEACHER_SUPERVISOR",
-  "PROJECT_TITLE",
-  "CATEGORIES",
+  "COMPETITION_CATEGORY",
+  "CULTURAL_ORIGIN",
+  "PERFORMANCE_TITLE",
   "COMPLETE_ADDRESS",
-  "FILE",
 ];
 
-export const submitToSheet = async (
+export const submitToIccSheet = async (
   sheetUrl: string,
   participant: ParticipantType,
   competition: CompetitionType,
@@ -41,38 +51,33 @@ export const submitToSheet = async (
     timestamp:                  new Date().toISOString(),
     CATEGORY_PARTICIPANT:       participant,
     CATEGORY_COMPETITION:       competition,
-    NAMA_SEKOLAH:               f("NAMA_SEKOLAH"),
-    NPSN:                       f("NPSN"),
     NAMA_LENGKAP:               f("NAMA_LENGKAP"),
-    NISN_NIM:                   f("NISN_NIM"),
-    PROVINCE:                   f("PROVINCE"),
-    GRADE:                      f("GRADE"),
-    LEADER_EMAIL:               f("LEADER_EMAIL"),
     LEADER_WHATSAPP:            f("LEADER_WHATSAPP"),
+    LEADER_EMAIL:               f("LEADER_EMAIL"),
+    NAMA_SEKOLAH:               f("NAMA_SEKOLAH"),
+    DIVISION:                   f("DIVISION"),
+    PROVINCE:                   f("PROVINCE"),
     NAME_SUPERVISOR:            f("NAME_SUPERVISOR"),
     WHATSAPP_NUMBER_SUPERVISOR: f("WHATSAPP_NUMBER_SUPERVISOR"),
     EMAIL_TEACHER_SUPERVISOR:   f("EMAIL_TEACHER_SUPERVISOR"),
+    COMPETITION_CATEGORY:       f("COMPETITION_CATEGORY"),
+    CULTURAL_ORIGIN:            f("CULTURAL_ORIGIN"),
+    PERFORMANCE_TITLE:          f("PERFORMANCE_TITLE"),
+    MEMBER_COUNT:               f("MEMBER_COUNT"),
     COMPLETE_ADDRESS:           f("COMPLETE_ADDRESS"),
     INFORMATION_RESOURCES:      f("INFORMATION_RESOURCES"),
+    MUSIC_FILE_LINK:            f("MUSIC_FILE_LINK"),
+    PROPERTY_DECLARATION:       f("PROPERTY_DECLARATION"),
     FILE:                       f("FILE"),
-    YES_NO:                     f("YES_NO"),
-    JUDUL_PERNAH_BERPATISIPASI: f("JUDUL_PERNAH_BERPATISIPASI"),
-    CATEGORY_PRICE:             "",
-    CATEGORIES:                 f("CATEGORIES"),
-    PROJECT_TITLE:              f("PROJECT_TITLE"),
   };
 
   const queryString = new URLSearchParams(payload).toString();
   const fullUrl = `${sheetUrl}?${queryString}`;
 
-  // DEBUG — lihat URL lengkap di console
-  console.log("=== SUBMIT DEBUG ===");
+  console.log("=== ICC SUBMIT DEBUG ===");
   console.log("sheetTarget:", sheetTarget);
-  console.log("sheetUrl:", sheetUrl);
   console.log("Full URL:", fullUrl);
 
-  // Coba semua metode sekaligus
-  // Metode 1: fetch
   try {
     await fetch(fullUrl, { method: "GET", mode: "no-cors" });
     console.log("fetch: terkirim");
@@ -80,43 +85,10 @@ export const submitToSheet = async (
     console.error("fetch gagal:", e);
   }
 
-  // Metode 2: Image
-  // try {
-  //   await new Promise<void>((resolve) => {
-  //     const img = new Image();
-  //     img.onload = () => { console.log("img: onload"); resolve(); };
-  //     img.onerror = () => { console.log("img: onerror (request tetap terkirim)"); resolve(); };
-  //     img.src = fullUrl;
-  //     setTimeout(resolve, 5000);
-  //   });
-  // } catch (e) {
-  //   console.error("img gagal:", e);
-  // }
-
-  // Metode 3: Script tag
-  // try {
-  //   await new Promise<void>((resolve) => {
-  //     const script = document.createElement("script");
-  //     script.src = fullUrl;
-  //     script.onload = () => { console.log("script tag: onload"); resolve(); };
-  //     script.onerror = () => { console.log("script tag: onerror"); resolve(); };
-  //     document.head.appendChild(script);
-  //     setTimeout(resolve, 5000);
-  //   });
-  // } catch (e) {
-  //   console.error("script tag gagal:", e);
-  // }
-
-  console.log("=== SELESAI — cek sheet sekarang ===");
-
-  // WA REDIRECT DINONAKTIFKAN SEMENTARA
-  // setTimeout(() => {
-  //   window.location.href = `https://wa.me/${WHATSAPP_ADMIN}?text=${msg}`;
-  // }, 1500);
+  console.log("=== SELESAI ===");
 };
-// ================================================================
-// Komponen UI Reusable
-// ================================================================
+
+// ── Reusable UI Components ──────────────────────────────────────
 
 export const Field = ({
   label, note, required, children,
@@ -125,7 +97,7 @@ export const Field = ({
 }) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-sm font-semibold text-foreground">
-      {label} {required && <span className="text-red-400">*</span>}
+      {label} {required && <span className="text-rose-400">*</span>}
     </label>
     {note && <p className="text-xs text-muted-foreground leading-5">{note}</p>}
     {children}
@@ -142,7 +114,7 @@ export const TextInput = ({
     placeholder={placeholder}
     value={value}
     onChange={e => onChange(e.target.value)}
-    className="rounded-lg border border-input bg-muted/30 px-4 py-3 text-sm focus:border-primary"
+    className="rounded-lg border border-input bg-muted/30 px-4 py-3 text-sm"
   />
 );
 
@@ -157,7 +129,7 @@ export const TextArea = ({
       value={value}
       onChange={e => onChange(e.target.value)}
       maxLength={maxLength}
-      className="w-full rounded-lg border border-input bg-muted/30 px-4 py-3 text-sm focus:border-primary focus:outline-none resize-none min-h-[100px]"
+      className="w-full rounded-lg border border-input bg-muted/30 px-4 py-3 text-sm focus:outline-none resize-none min-h-[100px]"
     />
     {maxLength && (
       <span className="absolute bottom-2 right-3 text-xs text-muted-foreground">
@@ -176,7 +148,7 @@ export const SelectInput = ({
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="w-full appearance-none rounded-lg border border-input bg-muted/30 px-4 py-3 text-sm focus:border-primary focus:outline-none text-foreground"
+      className="w-full appearance-none rounded-lg border border-input bg-muted/30 px-4 py-3 text-sm focus:outline-none text-foreground"
     >
       <option value="">{placeholder}</option>
       {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -186,23 +158,20 @@ export const SelectInput = ({
 );
 
 export const SectionTitle = ({ title }: { title: string }) => (
-  <div className="border-b border-primary pb-2 mb-5">
-    <h3 className="text-lg font-bold text-primary uppercase tracking-wide">{title}</h3>
+  <div className="pb-2 mb-5" style={{ borderBottom: "1px solid hsl(38 95% 55% / 0.3)" }}>
+    <h3 className="text-base font-bold uppercase tracking-wide" style={{ color: "hsl(38 95% 55%)" }}>{title}</h3>
   </div>
 );
 
 export const SuccessOverlay = () => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
     <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center gap-4 text-center shadow-xl">
-      
-      {/* Icon centang */}
-      <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center">
-        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-        </svg>
+      <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+        style={{ background: "linear-gradient(135deg, hsl(38 95% 55%), hsl(350 75% 55%))" }}>
+        🌸
       </div>
-
-      <h2 className="text-xl font-bold text-foreground">Registration Submitted!</h2>
+      <h2 className="text-xl font-bold text-foreground font-display">Registration Submitted!</h2>
+      <p className="text-sm text-muted-foreground">LoA will be sent to your email within 3 working days.</p>
     </div>
   </div>
 );

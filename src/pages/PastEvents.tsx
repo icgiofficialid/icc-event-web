@@ -1,12 +1,12 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
-import SiteShell from "@/components/iesf/iccShell";
+import SiteShell from "@/components/icc/IccShell"; // BENAR
 import SectionReveal from "@/components/icc/SectionReveal";
-import { events } from "@/components/icc/iccEventsData";
+import { iccEvents } from "@/components/icc/iccEventsData";
 
 const PastEvents = () => {
   const [search, setSearch] = useState("");
-  const pastEvents = events.filter(
+  const pastEvents = iccEvents.filter(
     (e) =>
       e.status === "past" &&
       (search === "" ||

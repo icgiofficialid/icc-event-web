@@ -1,6 +1,6 @@
 import TermsBox from "./IccTermsBox";
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbylqhWttZ6pjomknohOmLNlBUC-JAu1KxdElZUBiFZrSZ_uQQqwKKrD3Q1eVgdY_0no/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxRBVz45hwktXEaKac84iNHZM2YZcRTIhQxxkhnW_0SS4VfvU8kYR3gng3-yEGcoge_/exec";
 
 interface Props {
   onBack: () => void;

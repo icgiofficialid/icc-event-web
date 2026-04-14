@@ -1,14 +1,3 @@
-// ================================================================
-// AiChatbot.tsx — Floating AI Chatbot
-// Premium · cinematic · reusable untuk ICGI / IESF / ICC
-//
-// CARA PAKAI:
-//   import AiChatbot from "@/components/chatbot/AiChatbot";
-//   import { ICC_CONFIG } from "@/components/chatbot/useChatbot";
-//
-//   // Di dalam JSX (biasanya di root layout / Shell):
-//   <AiChatbot config={ICC_CONFIG} />
-// ================================================================
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -124,12 +113,12 @@ const WelcomeScreen = ({
   accentForeground: string;
   onSend: (text: string) => void;
 }) => {
-  const suggestions = [
-    "Bagaimana cara mendaftar?",
-    "Apa saja kategori kompetisi?",
-    "Kapan jadwal acara?",
-    "Hubungi panitia",
-  ];
+const suggestions = [
+  "How do I register?",
+  "What are the competition categories?",
+  "When is the event schedule?",
+  "How to contact the committee?",
+];
 
   return (
     <motion.div
@@ -418,7 +407,7 @@ const AiChatbot = ({ config, position = "bottom-right" }: AiChatbotProps) => {
               </div>
 
               <p className="text-center text-[10px] mt-2" style={{ color: "rgba(255,255,255,0.18)" }}>
-                Powered by Claude AI · {config.botName}
+                Powered by ICGI · {config.botName}
               </p>
             </div>
           </motion.div>

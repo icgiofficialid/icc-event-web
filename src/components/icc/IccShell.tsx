@@ -31,12 +31,9 @@ const IccShell = ({ children, showFooter = true }: IccShellProps) => {
       <ScrollToTop />
       <IccNavbar />
       <main className="relative">{children}</main>
+       
       {showFooter && <IccFooter />}
 
-      <>
-      {children}
-        <AiChatbot config={ICC_CONFIG} position="bottom-right" />
-      </>
       <motion.button
         type="button"
         initial={{ opacity: 0, y: 20 }}

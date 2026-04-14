@@ -7,11 +7,14 @@ import { ArrowUp } from "lucide-react";
 import IccNavbar from "./IccNavbar";
 import IccFooter from "./IccFooter";
 import ScrollToTop from "@/components/icc/ScrollToTop";
+import AiChatbot from "@/components/chatbot/AiChatbot";
+import { ICC_CONFIG } from "@/components/chatbot/useChatbot";
 
 type IccShellProps = {
   children: ReactNode;
   showFooter?: boolean;
 };
+
 
 const IccShell = ({ children, showFooter = true }: IccShellProps) => {
   const [showTop, setShowTop] = useState(false);
@@ -30,6 +33,10 @@ const IccShell = ({ children, showFooter = true }: IccShellProps) => {
       <main className="relative">{children}</main>
       {showFooter && <IccFooter />}
 
+      <>
+      {children}
+        <AiChatbot config={ICC_CONFIG} position="bottom-right" />
+      </>
       <motion.button
         type="button"
         initial={{ opacity: 0, y: 20 }}

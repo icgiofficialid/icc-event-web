@@ -31,6 +31,10 @@ import IccFaq from "./pages/IccFaq.tsx";
 import IccContact from "./pages/IccContact.tsx";
 import IccUpcomingEvents from "./pages/IccUpcomingEvents.tsx";
 import IccRegister from "@/pages/IccRegister.tsx";
+import { ICC_CONFIG } from "./components/chatbot/useChatbot.ts";
+import AiChatbot from "./components/chatbot/AiChatbot.tsx";
+
+
 
 const queryClient = new QueryClient();
 
@@ -51,7 +55,6 @@ const App = () => (
               <Route path="/events" element={<IccUpcomingEvents />} />
               <Route path="/past-events" element={<PastEvents />} />
               <Route path="/events/yicc" element={<YICCFDetail />} />
-
               {/* Existing pages */}
               <Route path="/about" element={<IccAbout />} />
               {/* <Route path="/sertifikat" element={<Sertifikat />} /> */}
@@ -65,6 +68,7 @@ const App = () => (
               <Route path="/register" element={<IccRegister />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+              <AiChatbot config={ICC_CONFIG} />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

@@ -1,10 +1,19 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ── Rate limiting sederhana (in-memory) ──────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://icc.icgi.or.id",
+  "https://iesf.icgi.or.id",
+  "https://icgi.or.id",
+  "https://iccofficial.or.id",
+  "https://www.iccofficial.or.id",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173",
+  "http://localhost:8080",
+];
+
 const ipMap = new Map<string, { count: number; reset: number }>();
-
-function checkRate(ip: string, max = 30, windowMs = 60_000): boolean {
+function checkRate(ip: string, max = 20, windowMs = 60_000): boolean {
   const now = Date.now();
   const entry = ipMap.get(ip);
   if (!entry || now > entry.reset) {
@@ -16,22 +25,7 @@ function checkRate(ip: string, max = 30, windowMs = 60_000): boolean {
   return true;
 }
 
-// ── Allowed origins ──────────────────────────────────────────────
-const ALLOWED_ORIGINS = [
-  "https://icc.icgi.or.id",
-  "https://iesf.icgi.or.id",
-  "https://icgi.or.id",
-  "https://iccofficial.or.id",       // ← tambahan
-  "https://www.iccofficial.or.id",   // ← tambahan (dengan www)
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "http://localhost:4173",
-  "http://localhost:8080",
-];
-
-// ── Handler ───────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
   const origin = req.headers.origin ?? "";
   if (ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -42,23 +36,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  // ── Validasi API Key ──────────────────────────────────────────
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    console.error("[chat] GEMINI_API_KEY is not set!");
     return res.status(500).json({ error: "Server configuration error: API key missing." });
   }
 
-  // Rate limit per IP
   const ip =
     (req.headers["x-forwarded-for"] as string)?.split(",")[0].trim() ??
-    req.socket.remoteAddress ??
-    "unknown";
+    req.socket.remoteAddress ?? "unknown";
 
   if (!checkRate(ip)) {
-    return res.status(429).json({
-      error: "Terlalu banyak permintaan. Coba lagi dalam 1 menit.",
-    });
+    return res.status(429).json({ error: "Terlalu banyak permintaan. Coba lagi dalam 1 menit." });
   }
 
   const { systemPrompt, messages } = req.body ?? {};
@@ -68,40 +56,75 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey); // ← init di dalam handler
+    // Format pesan untuk Groq (OpenAI-compatible)
+    const groqMessages = [
+      {
+        role: "system",
+        content: typeof systemPrompt === "string" ? systemPrompt : "You are a helpful assistant.",
+      },
+      ...messages.slice(-18).map((m: { role: string; content: string }) => ({
+        role: m.role, // "user" | "assistant" — sama dengan OpenAI
+        content: m.content,
+      })),
+    ];
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction: typeof systemPrompt === "string"
-        ? systemPrompt
-        : "You are a helpful assistant.",
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile", // model terbaik Groq, gratis
+        messages: groqMessages,
+        stream: true,
+        max_tokens: 1024,
+        temperature: 0.7,
+      }),
     });
 
-    const geminiHistory = messages
-      .slice(0, -1)
-      .slice(-18)
-      .map((m: { role: string; content: string }) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
-
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.role !== "user") {
-      return res.status(400).json({ error: "Pesan terakhir harus dari user" });
+    if (!groqRes.ok) {
+      const errData = await groqRes.json().catch(() => ({}));
+      throw new Error(errData?.error?.message ?? `Groq error: ${groqRes.status}`);
     }
 
-    const chat = model.startChat({ history: geminiHistory });
-
+    // SSE streaming
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("X-Accel-Buffering", "no");
 
-    const streamResult = await chat.sendMessageStream(lastMessage.content);
+    const reader = groqRes.body?.getReader();
+    if (!reader) throw new Error("No response body from Groq");
 
-    for await (const chunk of streamResult.stream) {
-      const text = chunk.text();
-      if (text) {
-        res.write(`data: ${JSON.stringify({ text })}\n\n`);
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") {
+          res.write("data: [DONE]\n\n");
+          res.end();
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          const text = parsed.choices?.[0]?.delta?.content;
+          if (text) {
+            res.write(`data: ${JSON.stringify({ text })}\n\n`);
+          }
+        } catch {
+          // skip invalid JSON
+        }
       }
     }
 
@@ -109,14 +132,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.end();
 
   } catch (err: unknown) {
-    console.error("[gemini] error:", err);
+    console.error("[groq] error:", err);
     const message = err instanceof Error ? err.message : "Internal server error";
-
-    if (message.includes("429") || message.includes("quota")) {
-      if (!res.headersSent) {
-        return res.status(429).json({ error: "Batas harian Gemini tercapai. Coba lagi besok." });
-      }
-    }
 
     if (!res.headersSent) {
       res.status(500).json({ error: message });

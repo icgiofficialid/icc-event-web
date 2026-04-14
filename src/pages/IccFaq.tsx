@@ -8,6 +8,8 @@ import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
 import { useLang } from "@/components/LanguageProvider";
 import { faqItems } from "@/components/icc/iccData";
+import AiChatbot from "@/components/chatbot/AiChatbot";        // ← tambah
+import { ICC_CONFIG } from "@/components/chatbot/useChatbot";  
 
 const IccFaq = () => {
   const { lang } = useLang();
@@ -60,6 +62,7 @@ const IccFaq = () => {
           ))}
         </div>
       </section>
+      <AiChatbot config={ICC_CONFIG} />
     </IccShell>
   );
 };

@@ -20,7 +20,12 @@ export const COMPETITION_CATEGORIES = [
   "Traditional Song Solo",
 ];
 
-export const PARTICIPANT_DIVISIONS = ["Elementary", "Junior High", "Senior High", "Open Division (University/Community/Studio)"];
+export const PARTICIPANT_DIVISIONS = [
+  "Elementary (Age 7–12)",
+  "Junior High (Age 13–15)",
+  "Senior High (Age 16–18)",
+  "Open Division (University / Community / Studio)",
+];
 
 export const REQUIRED_FIELDS = [
   "NAMA_LENGKAP",
@@ -46,29 +51,31 @@ export const submitToIccSheet = async (
 ) => {
   const f = (key: string) => form[key] || "";
 
+  // Payload kolom sesuai Excel baru
   const payload: Record<string, string> = {
     sheetTarget,
-    timestamp:                  new Date().toISOString(),
-    CATEGORY_PARTICIPANT:       participant,
-    CATEGORY_COMPETITION:       competition,
-    NAMA_LENGKAP:               f("NAMA_LENGKAP"),
-    LEADER_WHATSAPP:            f("LEADER_WHATSAPP"),
-    LEADER_EMAIL:               f("LEADER_EMAIL"),
-    NAMA_SEKOLAH:               f("NAMA_SEKOLAH"),
-    DIVISION:                   f("DIVISION"),
-    PROVINCE:                   f("PROVINCE"),
-    NAME_SUPERVISOR:            f("NAME_SUPERVISOR"),
-    WHATSAPP_NUMBER_SUPERVISOR: f("WHATSAPP_NUMBER_SUPERVISOR"),
-    EMAIL_TEACHER_SUPERVISOR:   f("EMAIL_TEACHER_SUPERVISOR"),
-    COMPETITION_CATEGORY:       f("COMPETITION_CATEGORY"),
-    CULTURAL_ORIGIN:            f("CULTURAL_ORIGIN"),
-    PERFORMANCE_TITLE:          f("PERFORMANCE_TITLE"),
-    MEMBER_COUNT:               f("MEMBER_COUNT"),
-    COMPLETE_ADDRESS:           f("COMPLETE_ADDRESS"),
-    INFORMATION_RESOURCES:      f("INFORMATION_RESOURCES"),
-    MUSIC_FILE_LINK:            f("MUSIC_FILE_LINK"),
-    PROPERTY_DECLARATION:       f("PROPERTY_DECLARATION"),
-    FILE:                       f("FILE"),
+    timestamp:                    new Date().toISOString(),
+    CATEGORY_PARTICIPANT:         participant,
+    CATEGORY_COMPETITION:         competition,
+    NAMA_LENGKAP:                 f("NAMA_LENGKAP"),
+    LEADER_WHATSAPP:              f("LEADER_WHATSAPP"),
+    LEADER_EMAIL:                 f("LEADER_EMAIL"),
+    NAMA_SEKOLAH:                 f("NAMA_SEKOLAH"),
+    DIVISION:                     f("DIVISION"),
+    PROVINCE:                     f("PROVINCE"),
+    NAME_SUPERVISOR:              f("NAME_SUPERVISOR"),
+    WHATSAPP_NUMBER_SUPERVISOR:   f("WHATSAPP_NUMBER_SUPERVISOR"),
+    EMAIL_TEACHER_SUPERVISOR:     f("EMAIL_TEACHER_SUPERVISOR"),
+    COMPETITION_CATEGORY:         f("COMPETITION_CATEGORY"),
+    PERFORMANCE_TITLE:            f("PERFORMANCE_TITLE"),
+    CULTURAL_ORIGIN:              f("CULTURAL_ORIGIN"),
+    PERFORMANCE_DESC:             f("PERFORMANCE_DESC"),
+    MEMBER_COUNT:                 f("MEMBER_COUNT"),
+    MUSIC_FILE_LINK:              f("MUSIC_FILE_LINK"),
+    PROPERTY_DECLARATION:         f("PROPERTY_DECLARATION"),
+    COMPLETE_ADDRESS:             f("COMPLETE_ADDRESS"),
+    INFORMATION_RESOURCES:        f("INFORMATION_RESOURCES"),
+    FILE:                         f("FILE"),
   };
 
   const queryString = new URLSearchParams(payload).toString();
@@ -88,7 +95,7 @@ export const submitToIccSheet = async (
   console.log("=== SELESAI ===");
 };
 
-// ── Reusable UI Components ──────────────────────────────────────
+// ── Reusable UI Components ────────────────────────────────────────
 
 export const Field = ({
   label, note, required, children,
@@ -166,7 +173,7 @@ export const SectionTitle = ({ title }: { title: string }) => (
 export const SuccessOverlay = () => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
     <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center gap-4 text-center shadow-xl">
-      <Check className="text-green-500" />
+      <Check className="text-green-500" size={48} />
       <h2 className="text-xl font-bold text-foreground font-display">Registration Submitted!</h2>
       <p className="text-sm text-muted-foreground">LoA will be sent to your email within 3 working days.</p>
     </div>

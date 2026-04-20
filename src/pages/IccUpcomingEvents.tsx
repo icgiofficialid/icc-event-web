@@ -1,34 +1,40 @@
 // ================================================================
-// IccUpcomingEvents.tsx
+// IccUpcomingEvents.tsx — Updated: pakai useEvents hook (tidak hardcode)
 // ================================================================
 import { useState } from "react";
-import { Search, MapPin, Calendar, ArrowRight } from "lucide-react";
+import { Search, MapPin, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
 import { useLang } from "@/components/LanguageProvider";
-import { iccEvents } from "@/components/icc/iccEventsData";
+import { useEvents } from "@/hooks/useEvents";
 
 const IccUpcomingEvents = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const { lang } = useLang();
 
+  // ← Sebelumnya: import { iccEvents } dari iccEventsData (hardcode)
+  // ← Sekarang:   fetch dari GAS Public API via useEvents hook
+  const { events, loading } = useEvents("icc");
+
   const LABELS = {
-    title:    { en: "Upcoming",      id: "Event" },
-    titleSub: { en: "Events",        id: "Mendatang" },
-    search:   { en: "Find event...", id: "Cari event..." },
-    noEvents: { en: "No events found.", id: "Tidak ada event ditemukan." },
+    title:    { en: "Upcoming",           id: "Event" },
+    titleSub: { en: "Events",             id: "Mendatang" },
+    search:   { en: "Find event...",      id: "Cari event..." },
+    noEvents: { en: "No events found.",   id: "Tidak ada event ditemukan." },
     deadline: { en: "Registration Deadline:", id: "Batas Pendaftaran:" },
-    register: { en: "Register Now",  id: "Daftar Sekarang" },
+    loading:  { en: "Loading events...", id: "Memuat events..." },
   };
 
-  const filtered = iccEvents
+  const filtered = events
     .filter(e => e.status === "upcoming")
-    .filter(e => search === "" ||
+    .filter(e =>
+      search === "" ||
       e.title.toLowerCase().includes(search.toLowerCase()) ||
-      e.location.toLowerCase().includes(search.toLowerCase()));
+      e.location.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
     <IccShell>
@@ -42,10 +48,14 @@ const IccUpcomingEvents = () => {
 
         <SectionReveal delay={0.1} className="mt-8 flex justify-center">
           <div className="relative w-full max-w-lg">
-            <input type="text" placeholder={LABELS.search[lang]}
-              value={search} onChange={e => setSearch(e.target.value)}
+            <input
+              type="text"
+              placeholder={LABELS.search[lang]}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-5 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 transition"
-              style={{ "--tw-ring-color": "hsl(38 95% 55% / 0.3)" } as React.CSSProperties} />
+              style={{ "--tw-ring-color": "hsl(38 95% 55% / 0.3)" } as React.CSSProperties}
+            />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white bg-primary">
               <Search className="h-4 w-4" />
             </div>
@@ -54,7 +64,14 @@ const IccUpcomingEvents = () => {
       </section>
 
       <section className="container pb-20">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <SectionReveal className="py-20 text-center text-muted-foreground">
+            <div className="space-y-3">
+              <div className="mx-auto w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-sm">{LABELS.loading[lang]}</p>
+            </div>
+          </SectionReveal>
+        ) : filtered.length === 0 ? (
           <SectionReveal className="py-24 text-center">
             <div className="space-y-3">
               <p className="text-5xl">🎭</p>
@@ -72,8 +89,10 @@ const IccUpcomingEvents = () => {
                   className="cursor-pointer group rounded-2xl overflow-hidden border border-border/70 bg-panel hover:shadow-xl transition-all duration-300"
                 >
                   <div className={`relative h-52 bg-gradient-to-br ${event.coverGradient} flex items-end p-0`}>
-                    <div className="absolute inset-0"
-                      style={{ backgroundImage: "radial-gradient(ellipse at 70% 20%, rgba(255,200,100,0.2) 0%, transparent 55%)" }} />
+                    <div
+                      className="absolute inset-0"
+                      style={{ backgroundImage: "radial-gradient(ellipse at 70% 20%, rgba(255,200,100,0.2) 0%, transparent 55%)" }}
+                    />
                     <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-xs font-semibold text-white">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                       {event.type}
@@ -94,8 +113,11 @@ const IccUpcomingEvents = () => {
                     </div>
                     <div className="flex flex-wrap gap-1 pt-1">
                       {event.tags.slice(0, 3).map(tag => (
-                        <span key={tag} className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                          style={{ background: "hsl(38 95% 55% / 0.12)", color: "hsl(38 95% 55%)" }}>
+                        <span
+                          key={tag}
+                          className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                          style={{ background: "hsl(38 95% 55% / 0.12)", color: "hsl(38 95% 55%)" }}
+                        >
                           {tag}
                         </span>
                       ))}

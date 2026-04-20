@@ -1,13 +1,35 @@
-import { Search } from "lucide-react";
+// ================================================================
+// PastEvents.tsx — Updated: pakai useEvents hook (tidak hardcode)
+// ================================================================
 import { useState } from "react";
-import SiteShell from "@/components/icc/IccShell"; // BENAR
+import { Search } from "lucide-react";
+import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
-import { iccEvents } from "@/components/icc/iccEventsData";
+import { useLang } from "@/components/LanguageProvider";
+import { useEvents } from "@/hooks/useEvents";
 
 const PastEvents = () => {
   const [search, setSearch] = useState("");
-  const pastEvents = iccEvents.filter(
-    (e) =>
+  const { lang } = useLang();
+
+  // ← Sebelumnya: import { iccEvents } dari iccEventsData (hardcode)
+  // ← Sekarang:   fetch dari GAS Public API via useEvents hook
+  const { events, loading } = useEvents("icc");
+
+  const LABELS = {
+    title:    { en: "Past",                id: "Event" },
+    titleSub: { en: "Events",              id: "Lalu" },
+    search:   { en: "Find event...",       id: "Cari event..." },
+    noEvents: { en: "No past events yet.", id: "Belum ada event yang selesai." },
+    noEventsDesc: {
+      en: "Past events will appear here after they conclude.",
+      id: "Event yang telah selesai akan muncul di sini.",
+    },
+    loading:  { en: "Loading events...",  id: "Memuat events..." },
+  };
+
+  const pastEvents = events.filter(
+    e =>
       e.status === "past" &&
       (search === "" ||
         e.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -15,12 +37,12 @@ const PastEvents = () => {
   );
 
   return (
-    <SiteShell>
+    <IccShell>
       <section className="container pt-16 pb-8 md:pt-20">
         <SectionReveal>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground text-center">
-            <span className="font-bold">Past</span>{" "}
-            <span className="font-light text-muted-foreground">Events</span>
+            <span className="font-bold">{LABELS.title[lang]}</span>{" "}
+            <span className="font-light text-muted-foreground">{LABELS.titleSub[lang]}</span>
           </h1>
         </SectionReveal>
 
@@ -28,9 +50,9 @@ const PastEvents = () => {
           <div className="relative w-full max-w-lg">
             <input
               type="text"
-              placeholder="Find event..."
+              placeholder={LABELS.search[lang]}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-5 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-primary p-1.5 text-primary-foreground">
@@ -41,14 +63,19 @@ const PastEvents = () => {
       </section>
 
       <section className="container pb-20">
-        {pastEvents.length === 0 ? (
+        {loading ? (
+          <SectionReveal className="py-20 text-center text-muted-foreground">
+            <div className="space-y-3">
+              <div className="mx-auto w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-sm">{LABELS.loading[lang]}</p>
+            </div>
+          </SectionReveal>
+        ) : pastEvents.length === 0 ? (
           <SectionReveal className="py-24 text-center">
             <div className="space-y-3">
               <p className="text-5xl">📂</p>
-              <p className="text-xl font-semibold text-foreground">No past events yet</p>
-              <p className="text-muted-foreground text-sm">
-                Past events will appear here after they conclude.
-              </p>
+              <p className="text-xl font-semibold text-foreground">{LABELS.noEvents[lang]}</p>
+              <p className="text-muted-foreground text-sm">{LABELS.noEventsDesc[lang]}</p>
             </div>
           </SectionReveal>
         ) : (
@@ -72,7 +99,7 @@ const PastEvents = () => {
           </div>
         )}
       </section>
-    </SiteShell>
+    </IccShell>
   );
 };
 

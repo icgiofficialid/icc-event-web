@@ -26,7 +26,6 @@ export interface ICCEvent {
   guidebookUrl:         string;
   registrationUrl:      string;
   spreadsheetId:        string;
-  is_coming_soon?:      boolean;
   date_display?:        string;
   is_active?:           boolean;
   sort_order?:          number;
@@ -80,7 +79,6 @@ function mapGasRowToEvent(row: Record<string, string>): ICCEvent {
     guidebookUrl:         row["guidebook_url"]         || "",
     registrationUrl:      row["registration_url"]      || "",
     spreadsheetId:        row["spreadsheet_id"]        || "",
-    is_coming_soon:       row["is_coming_soon"] === "TRUE" || row["is_coming_soon"] === "true",
     date_display:         row["date_display"]          || "",
     is_active:            row["is_active"] !== "FALSE" && row["is_active"] !== "false",
     sort_order:           row["sort_order"] ? Number(row["sort_order"]) : undefined,

@@ -108,7 +108,6 @@ export default function EventDetail() {
   const accentColor2  = "#f43f5e";
   const isIcc         = event.platform?.toLowerCase() === "icc";
   const tags          = event.tags ?? [];
-  const isComingSoon  = event.is_coming_soon ?? false;
 
   const titleWords  = event.title.split(" ");
   const firstWord   = titleWords[0];
@@ -194,12 +193,10 @@ export default function EventDetail() {
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
                 {event.type}
               </span>
-              {isComingSoon && (
                 <span className="rounded-full border border-amber-400/40 bg-amber-400/20 px-3 py-1 text-[10px] font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1">
                   <CalendarClock className="h-3 w-3" />
                   {LABELS.comingSoon[lang]}
                 </span>
-              )}
               {event.year && (
                 <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
                   {event.year}
@@ -240,30 +237,33 @@ export default function EventDetail() {
               )}
 
               {/* Tanggal — coming soon pakai date_display atau teks fallback */}
-              {isComingSoon ? (
                 <div className="flex items-center gap-2">
                   <CalendarClock className="h-4 w-4" />
-                  {event.date_display || LABELS.comingSoon[lang]}
+                  {event.date_display[lang]}
                 </div>
-              ) : (
                 <>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" /> {event.dateRange}
                   </div>
-                  {event.registrationDeadline && event.registrationDeadline !== "TBA" && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      {LABELS.deadline[lang]}: {formatDate(event.registrationDeadline)}
-                    </div>
-                  )}
+                {event.registrationDeadline && (
+                <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {LABELS.deadline[lang]}: {
+                    // Jika bukan ISO date, tampilkan apa adanya (misal "Coming Soon")
+                    isNaN(new Date(event.registrationDeadline).getTime())
+                        ? event.registrationDeadline
+                        : formatDate(event.registrationDeadline)
+                    }
+                </div>
+                )}
                 </>
-              )}
+              
             </div>
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-3 pt-2">
               {/* Sembunyikan Register jika coming soon dan belum ada registration_url */}
-              {(!isComingSoon || event.registrationUrl) && (
+              {(event.registrationUrl) && (
                 <button
                   onClick={() =>
                     event.registrationUrl

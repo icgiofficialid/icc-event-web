@@ -1,16 +1,12 @@
 // ================================================================
 // EventDetail.tsx — Dynamic event detail page (replaces YICCDetail)
 // Path: src/pages/EventDetail.tsx  (project: icc-event-web)
-//
-// Fetch event data dari GAS berdasarkan slug di URL.
-// Konten statis (criteria, schedule, dll) tetap dari iccData.ts
-// karena itu adalah konten editorial yang jarang berubah.
 // ================================================================
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Music2, Shirt, Mic2, Users, Award, Calendar, MapPin,
-  Clock, ChevronRight, FileText, ExternalLink,
+  Calendar, MapPin, Clock, ChevronRight, FileText, ExternalLink,
+  CalendarClock,
 } from "lucide-react";
 import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
@@ -30,8 +26,8 @@ function GradientText({ children, style }: { children: React.ReactNode; style?: 
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
-        backgroundImage: "linear-gradient(135deg, #f59e0b, #f43f5e)", // fallback
-        ...style, // style dari parent akan override ini
+        backgroundImage: "linear-gradient(135deg, #f59e0b, #f43f5e)",
+        ...style,
       }}
     >
       {children}
@@ -68,6 +64,7 @@ export default function EventDetail() {
     deadline:       { en: "Registration Deadline",       id: "Batas Pendaftaran" },
     loading:        { en: "Loading event…",              id: "Memuat event…" },
     notFound:       { en: "Event not found",             id: "Event tidak ditemukan" },
+    comingSoon:     { en: "Coming Soon",                 id: "Segera Hadir" },
   };
 
   // ── Loading state ────────────────────────────────────────────────
@@ -106,16 +103,29 @@ export default function EventDetail() {
   }
 
   // ── Derived values ───────────────────────────────────────────────
-  const coverGradient  = event.coverGradient  || "from-rose-950 via-fuchsia-950 to-amber-950";
-  const accentColor    = event.accentColor    || "hsl(38 95% 55%)";
-  const accentColor2   = "#f43f5e";
-  const isIcc          = event.platform?.toLowerCase() === "icc";
-  const tags           = event.tags ?? [];
-    const titleWords = event.title.split(" ");
-    const firstWord  = titleWords[0];
-    const middleWords = titleWords.length > 2 ? titleWords.slice(1, -1).join(" ") : titleWords.slice(1).join(" ");
-    const lastWord   = titleWords.length > 2 ? titleWords[titleWords.length - 1] : null;
+  const coverGradient = event.coverGradient || "from-rose-950 via-fuchsia-950 to-amber-950";
+  const accentColor   = event.accentColor   || "hsl(38 95% 55%)";
+  const accentColor2  = "#f43f5e";
+  const isIcc         = event.platform?.toLowerCase() === "icc";
+  const tags          = event.tags ?? [];
+  const isComingSoon  = event.is_coming_soon ?? false;
 
+  const titleWords  = event.title.split(" ");
+  const firstWord   = titleWords[0];
+  const middleWords = titleWords.length > 2
+    ? titleWords.slice(1, -1).join(" ")
+    : titleWords.slice(1).join(" ");
+  const lastWord    = titleWords.length > 2 ? titleWords[titleWords.length - 1] : null;
+
+  const formatDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString("id-ID", {
+        day: "numeric", month: "long", year: "numeric",
+      });
+    } catch {
+      return iso;
+    }
+  };
 
   const docsByCategory = {
     dance: {
@@ -131,15 +141,7 @@ export default function EventDetail() {
       id: ["Judul lagu", "Asal budaya / daerah / negara", "Deskripsi singkat atau makna lagu", "Iringan instrumental", "Lirik (jika diperlukan)"],
     },
   };
-  const formatDate = (iso: string) => {
-  try {
-    return new Date(iso).toLocaleDateString("id-ID", {
-      day: "numeric", month: "long", year: "numeric",
-    });
-  } catch {
-    return iso; // fallback ke raw string jika gagal parse
-  }
-}
+
   return (
     <IccShell>
 
@@ -192,6 +194,12 @@ export default function EventDetail() {
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
                 {event.type}
               </span>
+              {isComingSoon && (
+                <span className="rounded-full border border-amber-400/40 bg-amber-400/20 px-3 py-1 text-[10px] font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1">
+                  <CalendarClock className="h-3 w-3" />
+                  {LABELS.comingSoon[lang]}
+                </span>
+              )}
               {event.year && (
                 <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
                   {event.year}
@@ -209,11 +217,11 @@ export default function EventDetail() {
 
             {/* Title */}
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white leading-tight">
-            {firstWord}<br />
-            <GradientText style={{ backgroundImage: `linear-gradient(135deg, ${accentColor}, ${accentColor2})` }}>
+              {firstWord}<br />
+              <GradientText style={{ backgroundImage: `linear-gradient(135deg, ${accentColor}, ${accentColor2})` }}>
                 {middleWords}
-            </GradientText>
-            {lastWord && <><br />{lastWord}</>}
+              </GradientText>
+              {lastWord && <><br />{lastWord}</>}
             </h1>
 
             {/* Description */}
@@ -230,30 +238,44 @@ export default function EventDetail() {
                   <MapPin className="h-4 w-4" /> {event.location}
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" /> {event.dateRange}
-              </div>
-              {event.registrationDeadline && event.registrationDeadline !== "TBA" && (
+
+              {/* Tanggal — coming soon pakai date_display atau teks fallback */}
+              {isComingSoon ? (
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  {LABELS.deadline[lang]}: {formatDate(event.registrationDeadline)}
+                  <CalendarClock className="h-4 w-4" />
+                  {event.date_display || LABELS.comingSoon[lang]}
                 </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" /> {event.dateRange}
+                  </div>
+                  {event.registrationDeadline && event.registrationDeadline !== "TBA" && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      {LABELS.deadline[lang]}: {formatDate(event.registrationDeadline)}
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-3 pt-2">
-              <button
-                onClick={() =>
-                  event.registrationUrl
-                    ? window.open(event.registrationUrl, "_blank")
-                    : navigate("/register")
-                }
-                className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm hover:brightness-110 transition-all"
-                style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor2})`, color: "#fff" }}
-              >
-                {LABELS.registerBtn[lang]}
-              </button>
+              {/* Sembunyikan Register jika coming soon dan belum ada registration_url */}
+              {(!isComingSoon || event.registrationUrl) && (
+                <button
+                  onClick={() =>
+                    event.registrationUrl
+                      ? window.open(event.registrationUrl, "_blank")
+                      : navigate("/register")
+                  }
+                  className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm hover:brightness-110 transition-all"
+                  style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor2})`, color: "#fff" }}
+                >
+                  {LABELS.registerBtn[lang]}
+                </button>
+              )}
 
               {event.guidebookUrl ? (
                 <a
@@ -431,9 +453,7 @@ export default function EventDetail() {
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
                     style={{
-                      background: i % 2 === 0
-                        ? `${accentColor}26`
-                        : `${accentColor2}26`,
+                      background: i % 2 === 0 ? `${accentColor}26` : `${accentColor2}26`,
                     }}
                   >
                     {day.icon}
@@ -499,9 +519,9 @@ export default function EventDetail() {
           </SectionReveal>
           <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
             {[
-              { icon: "🕺", title: { en: "Dance Categories", id: "Kategori Tari" },      docs: docsByCategory.dance },
-              { icon: "👘", title: { en: "Costume Show",     id: "Pertunjukan Kostum" },  docs: docsByCategory.costume },
-              { icon: "🎤", title: { en: "Traditional Song", id: "Lagu Tradisional" },    docs: docsByCategory.vocal },
+              { icon: "🕺", title: { en: "Dance Categories", id: "Kategori Tari" },     docs: docsByCategory.dance },
+              { icon: "👘", title: { en: "Costume Show",     id: "Pertunjukan Kostum" }, docs: docsByCategory.costume },
+              { icon: "🎤", title: { en: "Traditional Song", id: "Lagu Tradisional" },   docs: docsByCategory.vocal },
             ].map(({ icon, title, docs }, i) => (
               <SectionReveal key={i} delay={i * 0.1}>
                 <div className="cultural-shell rounded-2xl p-6 h-full">

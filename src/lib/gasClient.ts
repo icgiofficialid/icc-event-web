@@ -15,7 +15,7 @@ export interface ICCEvent {
   location:             string;
   country:              string;
   dateRange:            string;
-  year:                 number;
+  year?:                number;
   registrationDeadline: string;
   coverGradient:        string;
   accentColor:          string;
@@ -26,24 +26,25 @@ export interface ICCEvent {
   guidebookUrl:         string;
   registrationUrl:      string;
   spreadsheetId:        string;
+  is_coming_soon?:      boolean;
+  date_display?:        string;
+  is_active?:           boolean;
+  sort_order?:          number;
 }
 
 const GAS_API_URL = import.meta.env.VITE_GAS_PUBLIC_API_URL as string | undefined;
 
 // ── Mapper: row GAS → ICCEvent ────────────────────────────────────
-// Kolom di sheet Events harus cocok dengan field ini
 function mapGasRowToEvent(row: Record<string, string>): ICCEvent {
   const startDate = row["start_date"] ?? "";
   const endDate   = row["end_date"]   ?? "";
 
-  // Tentukan status: upcoming atau past berdasarkan end_date
   let status: EventStatus = "upcoming";
   if (endDate) {
     const end = new Date(endDate);
     if (!isNaN(end.getTime()) && end < new Date()) status = "past";
   }
 
-  // Format tanggal jadi "Aug 10 – 14, 2026" atau "TBA"
   let dateRange = "TBA";
   if (startDate && endDate) {
     try {
@@ -54,32 +55,35 @@ function mapGasRowToEvent(row: Record<string, string>): ICCEvent {
     } catch { dateRange = `${startDate} – ${endDate}`; }
   }
 
-  // Tags dari kolom tags (comma-separated) atau category
   const tags = row["tags"]
     ? row["tags"].split(",").map(t => t.trim()).filter(Boolean)
     : ["Culture", "International"];
 
   return {
-    id:                   row["event_id"]             ?? "",
-    slug:                 row["slug"]                 || row["event_id"]?.toLowerCase() || "",
-    type:                 (row["event_type"]          as EventType) ?? "Competition",
+    id:                   row["event_id"]              ?? "",
+    slug:                 row["slug"]                  || row["event_id"]?.toLowerCase() || "",
+    type:                 (row["event_type"]           as EventType) ?? "Competition",
     status,
-    title:                row["event_name"]           ?? "",
-    subtitle:             row["subtitle"]             || row["event_id"] || "",
-    location:             row["location"]             || "Yogyakarta, Indonesia",
-    country:              row["country"]              || "Indonesia",
+    title:                row["event_name"]            ?? "",
+    subtitle:             row["subtitle"]              || row["event_id"] || "",
+    location:             row["location"]              || "Yogyakarta, Indonesia",
+    country:              row["country"]               || "Indonesia",
     dateRange,
     year:                 startDate ? new Date(startDate).getFullYear() : new Date().getFullYear(),
     registrationDeadline: row["registration_deadline"] || "TBA",
-    coverGradient:        row["cover_gradient"]       || "from-rose-900 via-fuchsia-900 to-amber-900",
-    accentColor:          row["accent_color"]         || "#f43f5e",
-    description:          row["description"]          || "",
+    coverGradient:        row["cover_gradient"]        || "from-rose-900 via-fuchsia-900 to-amber-900",
+    accentColor:          row["accent_color"]          || "#f43f5e",
+    description:          row["description"]           || "",
     tags,
-    platform:             (row["platform"]            || "icc").toLowerCase(),
-    posterUrl:            row["poster_url"]           || "",
-    guidebookUrl:         row["guidebook_url"]        || "",
-    registrationUrl:      row["registration_url"]     || "",
-    spreadsheetId:        row["spreadsheet_id"]       || "",
+    platform:             (row["platform"]             || "icc").toLowerCase(),
+    posterUrl:            row["poster_url"]            || "",
+    guidebookUrl:         row["guidebook_url"]         || "",
+    registrationUrl:      row["registration_url"]      || "",
+    spreadsheetId:        row["spreadsheet_id"]        || "",
+    is_coming_soon:       row["is_coming_soon"] === "TRUE" || row["is_coming_soon"] === "true",
+    date_display:         row["date_display"]          || "",
+    is_active:            row["is_active"] !== "FALSE" && row["is_active"] !== "false",
+    sort_order:           row["sort_order"] ? Number(row["sort_order"]) : undefined,
   };
 }
 
@@ -102,7 +106,6 @@ export async function fetchEvents(
 
     const json = await res.json();
 
-    // GAS return: { status: "success", data: [...] }
     if (json.status === "error") throw new Error(json.message ?? "GAS error");
 
     const rows: Record<string, string>[] = Array.isArray(json.data)
@@ -128,7 +131,6 @@ export async function fetchEventBySlug(
   if (!GAS_API_URL) return fallback;
 
   try {
-    // Ambil semua events lalu filter by slug — lebih reliable daripada endpoint terpisah
     const all = await fetchEvents(undefined, []);
     const found = all.find(e => e.slug === slug || e.id.toLowerCase() === slug.toLowerCase());
     return found ?? fallback;

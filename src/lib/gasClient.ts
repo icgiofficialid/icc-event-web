@@ -1,13 +1,7 @@
 // ================================================================
-// gasClient.ts
-// Path: src/lib/gasClient.ts  (project: icc-event-web)
-//
-// Client untuk fetch data event ICC dari GAS Public API.
-// URL API dikonfigurasi via environment variable VITE_GAS_PUBLIC_API_URL.
-// Jika API tidak tersedia / gagal, fallback ke data lokal (localFallback).
+// gasClient.ts — icc-event-web
 // ================================================================
 
-// ── TYPES ─────────────────────────────────────────────────────────
 export type EventType   = "Competition" | "Workshop" | "Exhibition";
 export type EventStatus = "upcoming" | "past";
 
@@ -27,26 +21,69 @@ export interface ICCEvent {
   accentColor:          string;
   description:          string;
   tags:                 string[];
-  platform:             string;   // selalu "icc"
+  platform:             string;
   posterUrl:            string;
   guidebookUrl:         string;
   registrationUrl:      string;
   spreadsheetId:        string;
 }
 
-// ── ENV ───────────────────────────────────────────────────────────
 const GAS_API_URL = import.meta.env.VITE_GAS_PUBLIC_API_URL as string | undefined;
 
-// ── FETCH SEMUA EVENTS ────────────────────────────────────────────
-/**
- * Fetch semua published ICC events dari GAS Public API.
- *
- * @param platform  Optional filter: "icc" (kosong = semua)
- * @param fallback  Data lokal sebagai cadangan jika API gagal
- *
- * @example
- * const events = await fetchEvents("icc", localIccEvents);
- */
+// ── Mapper: row GAS → ICCEvent ────────────────────────────────────
+// Kolom di sheet Events harus cocok dengan field ini
+function mapGasRowToEvent(row: Record<string, string>): ICCEvent {
+  const startDate = row["start_date"] ?? "";
+  const endDate   = row["end_date"]   ?? "";
+
+  // Tentukan status: upcoming atau past berdasarkan end_date
+  let status: EventStatus = "upcoming";
+  if (endDate) {
+    const end = new Date(endDate);
+    if (!isNaN(end.getTime()) && end < new Date()) status = "past";
+  }
+
+  // Format tanggal jadi "Aug 10 – 14, 2026" atau "TBA"
+  let dateRange = "TBA";
+  if (startDate && endDate) {
+    try {
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const fmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+      dateRange = `${fmt.format(s)} – ${fmt.format(e)}, ${e.getFullYear()}`;
+    } catch { dateRange = `${startDate} – ${endDate}`; }
+  }
+
+  // Tags dari kolom tags (comma-separated) atau category
+  const tags = row["tags"]
+    ? row["tags"].split(",").map(t => t.trim()).filter(Boolean)
+    : ["Culture", "International"];
+
+  return {
+    id:                   row["event_id"]             ?? "",
+    slug:                 row["slug"]                 || row["event_id"]?.toLowerCase() || "",
+    type:                 (row["event_type"]          as EventType) ?? "Competition",
+    status,
+    title:                row["event_name"]           ?? "",
+    subtitle:             row["subtitle"]             || row["event_id"] || "",
+    location:             row["location"]             || "Yogyakarta, Indonesia",
+    country:              row["country"]              || "Indonesia",
+    dateRange,
+    year:                 startDate ? new Date(startDate).getFullYear() : new Date().getFullYear(),
+    registrationDeadline: row["registration_deadline"] || "TBA",
+    coverGradient:        row["cover_gradient"]       || "from-rose-900 via-fuchsia-900 to-amber-900",
+    accentColor:          row["accent_color"]         || "#f43f5e",
+    description:          row["description"]          || "",
+    tags,
+    platform:             (row["platform"]            || "icc").toLowerCase(),
+    posterUrl:            row["poster_url"]           || "",
+    guidebookUrl:         row["guidebook_url"]        || "",
+    registrationUrl:      row["registration_url"]     || "",
+    spreadsheetId:        row["spreadsheet_id"]       || "",
+  };
+}
+
+// ── fetchEvents ───────────────────────────────────────────────────
 export async function fetchEvents(
   platform?: string,
   fallback: ICCEvent[] = []
@@ -57,66 +94,47 @@ export async function fetchEvents(
   }
 
   try {
-    const params = new URLSearchParams({ action: "getEvents" });
+    const params = new URLSearchParams({ action: "getEvents", published_only: "true" });
     if (platform) params.set("platform", platform);
 
-    const res = await fetch(`${GAS_API_URL}?${params}`, {
-      method: "GET",
-      cache:  "no-store",
-    });
-
+    const res = await fetch(`${GAS_API_URL}?${params}`, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const json = await res.json();
-    if (json.error) throw new Error(json.error);
-    if (!Array.isArray(json.events)) throw new Error("Format response tidak valid.");
 
-    const data = json.events as ICCEvent[];
+    // GAS return: { status: "success", data: [...] }
+    if (json.status === "error") throw new Error(json.message ?? "GAS error");
 
-    // Jika API return kosong, gunakan fallback lokal
-    return data.length > 0 ? data : fallback;
+    const rows: Record<string, string>[] = Array.isArray(json.data)
+      ? json.data
+      : Array.isArray(json.events)
+        ? json.events
+        : [];
+
+    const mapped = rows.map(mapGasRowToEvent);
+    return mapped.length > 0 ? mapped : fallback;
 
   } catch (err) {
-    console.error("[gasClient-icc] Gagal fetch events, menggunakan fallback:", err);
+    console.error("[gasClient-icc] Gagal fetch events:", err);
     return fallback;
   }
 }
 
-// ── FETCH SATU EVENT BY SLUG ──────────────────────────────────────
-/**
- * Fetch detail satu event berdasarkan slug.
- *
- * @param slug      Slug event, misal: "yicc"
- * @param fallback  Event lokal sebagai cadangan jika API gagal
- *
- * @example
- * const event = await fetchEventBySlug("yicc", localFallback);
- */
+// ── fetchEventBySlug ──────────────────────────────────────────────
 export async function fetchEventBySlug(
   slug: string,
   fallback: ICCEvent | null = null
 ): Promise<ICCEvent | null> {
-  if (!GAS_API_URL) {
-    console.warn("[gasClient-icc] VITE_GAS_PUBLIC_API_URL tidak di-set. Menggunakan data lokal.");
-    return fallback;
-  }
+  if (!GAS_API_URL) return fallback;
 
   try {
-    const params = new URLSearchParams({ action: "getEvent", slug });
-    const res = await fetch(`${GAS_API_URL}?${params}`, {
-      method: "GET",
-      cache:  "no-store",
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const json = await res.json();
-    if (json.error) throw new Error(json.error);
-
-    return (json.event as ICCEvent) ?? fallback;
+    // Ambil semua events lalu filter by slug — lebih reliable daripada endpoint terpisah
+    const all = await fetchEvents(undefined, []);
+    const found = all.find(e => e.slug === slug || e.id.toLowerCase() === slug.toLowerCase());
+    return found ?? fallback;
 
   } catch (err) {
-    console.error(`[gasClient-icc] Gagal fetch event "${slug}", menggunakan fallback:`, err);
+    console.error(`[gasClient-icc] Gagal fetch event "${slug}":`, err);
     return fallback;
   }
 }

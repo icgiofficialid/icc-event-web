@@ -23,7 +23,7 @@ import register from "@/pages/IccRegister.tsx";
 // New event portal pages
 import UpcomingEvents from "./pages/IccUpcomingEvents.tsx";
 import PastEvents from "./pages/PastEvents";
-import YICCFDetail from "./pages/events/YICCDetail.tsx";
+import EventDetail from "./pages/events/Eventdetail.tsx";
 import { Scroll } from "lucide-react";
 import ScrollToTop from "./components/icc/ScrollToTop.tsx";
 import IccAbout from "./pages/IccAbout.tsx";
@@ -54,7 +54,7 @@ const App = () => (
               {/* Event Portal */}
               <Route path="/events" element={<IccUpcomingEvents />} />
               <Route path="/past-events" element={<PastEvents />} />
-              <Route path="/events/yicc" element={<YICCFDetail />} />
+              <Route path="/events/:slug" element={<EventDetail />} />
               {/* Existing pages */}
               <Route path="/about" element={<IccAbout />} />
               {/* <Route path="/sertifikat" element={<Sertifikat />} /> */}

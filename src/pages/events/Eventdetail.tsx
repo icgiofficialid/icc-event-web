@@ -25,7 +25,15 @@ import {
 
 function GradientText({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <span style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", ...style }}>
+    <span
+      style={{
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        backgroundImage: "linear-gradient(135deg, #f59e0b, #f43f5e)", // fallback
+        ...style, // style dari parent akan override ini
+      }}
+    >
       {children}
     </span>
   );
@@ -103,6 +111,11 @@ export default function EventDetail() {
   const accentColor2   = "#f43f5e";
   const isIcc          = event.platform?.toLowerCase() === "icc";
   const tags           = event.tags ?? [];
+    const titleWords = event.title.split(" ");
+    const firstWord  = titleWords[0];
+    const middleWords = titleWords.length > 2 ? titleWords.slice(1, -1).join(" ") : titleWords.slice(1).join(" ");
+    const lastWord   = titleWords.length > 2 ? titleWords[titleWords.length - 1] : null;
+
 
   const docsByCategory = {
     dance: {
@@ -118,7 +131,15 @@ export default function EventDetail() {
       id: ["Judul lagu", "Asal budaya / daerah / negara", "Deskripsi singkat atau makna lagu", "Iringan instrumental", "Lirik (jika diperlukan)"],
     },
   };
-
+  const formatDate = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleDateString("id-ID", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+  } catch {
+    return iso; // fallback ke raw string jika gagal parse
+  }
+}
   return (
     <IccShell>
 
@@ -188,13 +209,11 @@ export default function EventDetail() {
 
             {/* Title */}
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white leading-tight">
-              {event.title.split(" ").slice(0, 1).join(" ")}<br />
-              <GradientText style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor2})` }}>
-                {event.title.split(" ").slice(1, -1).join(" ")}
-              </GradientText>
-              {event.title.split(" ").length > 2 && (
-                <><br />{event.title.split(" ").slice(-1)}</>
-              )}
+            {firstWord}<br />
+            <GradientText style={{ backgroundImage: `linear-gradient(135deg, ${accentColor}, ${accentColor2})` }}>
+                {middleWords}
+            </GradientText>
+            {lastWord && <><br />{lastWord}</>}
             </h1>
 
             {/* Description */}
@@ -217,7 +236,7 @@ export default function EventDetail() {
               {event.registrationDeadline && event.registrationDeadline !== "TBA" && (
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  {LABELS.deadline[lang]}: {event.registrationDeadline}
+                  {LABELS.deadline[lang]}: {formatDate(event.registrationDeadline)}
                 </div>
               )}
             </div>

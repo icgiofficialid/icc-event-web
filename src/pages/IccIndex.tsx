@@ -1,6 +1,6 @@
 // ================================================================
-// IccIndex.tsx — Monochrome premium · obsidian black & white
-// Cinematic · editorial · modern
+// IccIndex.tsx — Fixed: pakai useEvents hook (tidak hardcode)
+// Popup dinamis, EventCard pakai ICCEvent type
 // ================================================================
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
@@ -9,10 +9,11 @@ import { useNavigate } from "react-router-dom";
 import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
 import { useLang } from "@/components/LanguageProvider";
-import { iccEvents } from "@/components/icc/iccEventsData";
+import { useEvents } from "@/hooks/useEvents";
+import type { ICCEvent } from "@/lib/gasClient";
 import { competitionCategories, goals, pageMeta } from "@/components/icc/iccData";
 
-// ── SNOWFLAKE LOGO — matches the geometric crystal logo ───────────
+// ── SNOWFLAKE LOGO ────────────────────────────────────────────────
 const SnowflakeMark = ({
   size = 120,
   opacity = 0.1,
@@ -52,8 +53,8 @@ const SnowflakeMark = ({
   );
 };
 
-// ── EVENT CARD ────────────────────────────────────────────────────
-const EventCard = ({ event, index }: { event: typeof iccEvents[0]; index: number }) => {
+// ── EVENT CARD — pakai ICCEvent type ─────────────────────────────
+const EventCard = ({ event, index }: { event: ICCEvent; index: number }) => {
   const navigate = useNavigate();
   return (
     <SectionReveal delay={index * 0.08} className="h-full">
@@ -70,7 +71,6 @@ const EventCard = ({ event, index }: { event: typeof iccEvents[0]; index: number
             border: "1px solid rgba(255,180,60,0.18)",
           }}
         >
-          {/* Card face — fixed warm gradient, theme-independent */}
           <div
             className="relative aspect-[3/4] flex flex-col justify-between p-5"
             style={{
@@ -81,24 +81,18 @@ const EventCard = ({ event, index }: { event: typeof iccEvents[0]; index: number
               `,
             }}
           >
-            {/* Watermark snowflake */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <SnowflakeMark size={130} opacity={0.05} className="text-amber-300" />
             </div>
-
-            {/* Subtle top vignette */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: "linear-gradient(180deg, rgba(255,180,60,0.06) 0%, transparent 40%, rgba(160,20,40,0.12) 100%)",
               }}
             />
-
-            {/* Noise overlay */}
             <div className="absolute inset-0 opacity-[0.06]"
               style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }} />
 
-            {/* Top row */}
             <div className="relative flex items-start justify-between z-10">
               <div className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest border border-white/15 bg-white/8">
                 <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
@@ -110,7 +104,6 @@ const EventCard = ({ event, index }: { event: typeof iccEvents[0]; index: number
               >ICC</span>
             </div>
 
-            {/* Bottom content */}
             <div className="relative z-10 space-y-1.5">
               <div className="w-6 h-px bg-white/25 mb-3" />
               <p className="text-white/45 text-[9px] uppercase tracking-[0.28em] font-semibold">{event.subtitle}</p>
@@ -140,8 +133,14 @@ const EventCard = ({ event, index }: { event: typeof iccEvents[0]; index: number
   );
 };
 
-// ── POPUP ─────────────────────────────────────────────────────────
-const EventPopup = ({ onClose }: { onClose: () => void }) => {
+// ── POPUP — slug dinamis dari event pertama ───────────────────────
+const EventPopup = ({
+  event,
+  onClose,
+}: {
+  event: ICCEvent;
+  onClose: () => void;
+}) => {
   const navigate = useNavigate();
   return (
     <motion.div
@@ -159,14 +158,16 @@ const EventPopup = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)",
         }}
       >
-        {/* Top accent bar — warm gold-crimson sesuai card */}
         <div
           className="h-[3px]"
           style={{
             background: "linear-gradient(90deg, #f59e0b 0%, #ef4444 60%, transparent 100%)",
           }}
         />
-        <div className="p-4 cursor-pointer group" onClick={() => { navigate("/events/yicc"); onClose(); }}>
+        <div
+          className="p-4 cursor-pointer group"
+          onClick={() => { navigate(`/events/${event.slug}`); onClose(); }}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-1.5 w-1.5">
@@ -186,15 +187,15 @@ const EventPopup = ({ onClose }: { onClose: () => void }) => {
 
           <div className="space-y-1">
             <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "#9ca3af" }}>
-              Cultural Competition · 2026
+              {event.type} · {event.year ?? new Date().getFullYear()}
             </p>
             <p
               className="text-xl font-semibold leading-tight"
               style={{ fontFamily: "'Cormorant Garamond', serif", color: "#111827", fontWeight: 600 }}
             >
-              YICC 2026
+              {event.subtitle || event.title}
             </p>
-            <p className="text-xs" style={{ color: "#6b7280" }}>Yogyakarta, Indonesia</p>
+            <p className="text-xs" style={{ color: "#6b7280" }}>{event.location}</p>
           </div>
 
           <div
@@ -217,7 +218,7 @@ const EventPopup = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-// ── CINEMATIC COUNTER (letter by letter reveal) ───────────────────
+// ── LETTER REVEAL ─────────────────────────────────────────────────
 const LetterReveal = ({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) => {
   return (
     <span className={className} aria-label={text}>
@@ -246,19 +247,26 @@ const IccIndex = () => {
   const [showPopup, setShowPopup] = useState(false);
   const { lang } = useLang();
   const heroRef = useRef<HTMLElement>(null);
-  const upcomingEvents = iccEvents.filter(e => e.status === "upcoming");
   const meta = pageMeta.about;
 
-  // Parallax for hero logo
+  // ← FIXED: pakai useEvents hook, sama seperti IccUpcomingEvents
+  const { events, loading } = useEvents("icc");
+  const upcomingEvents = events.filter(e => e.status === "upcoming");
+
+  // Event pertama untuk popup — dinamis, tidak hardcode
+  const popupEvent = upcomingEvents[0] ?? null;
+
   const { scrollY } = useScroll();
   const logoY = useTransform(scrollY, [0, 600], [0, -80]);
   const logoOpacity = useTransform(scrollY, [0, 400], [0.06, 0]);
 
   useEffect(() => {
+    // Hanya tampilkan popup jika ada event dan sudah selesai loading
+    if (loading || !popupEvent) return;
     const show = setTimeout(() => setShowPopup(true), 2800);
     const hide = setTimeout(() => setShowPopup(false), 7500);
     return () => { clearTimeout(show); clearTimeout(hide); };
-  }, []);
+  }, [loading, popupEvent]);
 
   const LABELS = {
     heroEyebrow: { en: "International Cultural Competition", id: "Kompetisi Budaya Internasional" },
@@ -272,20 +280,21 @@ const IccIndex = () => {
     catSub:      { en: "Four performance categories celebrating the richness of global culture", id: "Empat kategori penampilan merayakan kekayaan budaya global" },
     eventsTitle: { en: "Upcoming Events",   id: "Event Mendatang" },
     noEvents:    { en: "No events found.",  id: "Tidak ada event." },
+    loading:     { en: "Loading events...", id: "Memuat events..." },
     scrollLabel: { en: "Scroll",            id: "Gulir" },
   };
+
+  // Slug untuk tombol Register Now — pakai event pertama, fallback ke /events
+  const firstEventSlug = upcomingEvents[0]?.slug;
 
   return (
     <IccShell>
 
-      {/* ══════════════════════════════════════════════════════════
-          HERO
-      ══════════════════════════════════════════════════════════ */}
+      {/* ══ HERO ══ */}
       <section
         ref={heroRef}
         className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden"
       >
-        {/* Ambient background glow */}
         <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute inset-0"
@@ -295,7 +304,6 @@ const IccIndex = () => {
           />
         </div>
 
-        {/* Parallax large snowflake — background */}
         <motion.div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none text-foreground"
           style={{ y: logoY, opacity: logoOpacity }}
@@ -305,7 +313,6 @@ const IccIndex = () => {
           <SnowflakeMark size={700} opacity={1} />
         </motion.div>
 
-        {/* Top-right accent snowflake */}
         <motion.div
           className="absolute -top-12 -right-12 pointer-events-none select-none text-foreground"
           style={{ opacity: 0.04 }}
@@ -315,7 +322,6 @@ const IccIndex = () => {
           <SnowflakeMark size={320} opacity={1} />
         </motion.div>
 
-        {/* Bottom-left accent */}
         <motion.div
           className="absolute -bottom-16 -left-16 pointer-events-none select-none text-foreground"
           style={{ opacity: 0.03 }}
@@ -325,7 +331,6 @@ const IccIndex = () => {
           <SnowflakeMark size={240} opacity={1} />
         </motion.div>
 
-        {/* Horizontal scan lines (cinematic) */}
         <motion.div
           className="absolute left-0 right-0 h-px pointer-events-none"
           style={{ top: "30%", background: "linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.06), transparent)" }}
@@ -339,10 +344,7 @@ const IccIndex = () => {
           transition={{ duration: 4, repeat: Infinity, delay: 2.5 }}
         />
 
-        {/* Content */}
         <motion.div className="relative z-10 flex flex-col items-center gap-8 max-w-5xl w-full">
-
-          {/* Eyebrow badge */}
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -354,9 +356,7 @@ const IccIndex = () => {
             </div>
           </motion.div>
 
-          {/* MAIN TITLE — cinematic letter reveal */}
           <div className="relative flex flex-col items-center gap-1 perspective-[800px]">
-            {/* Glow bloom behind title */}
             <motion.div
               className="absolute inset-0 -z-10 blur-[120px]"
               initial={{ opacity: 0 }}
@@ -364,7 +364,6 @@ const IccIndex = () => {
               transition={{ delay: 0.6, duration: 1.5 }}
               style={{ background: "radial-gradient(ellipse, hsl(var(--foreground)) 0%, transparent 70%)" }}
             />
-
             <h1
               style={{
                 fontFamily: "'Cinzel', serif",
@@ -378,7 +377,6 @@ const IccIndex = () => {
               <LetterReveal text="ICC" delay={0.3} />
             </h1>
 
-            {/* Decorative rule */}
             <div className="flex items-center gap-3 mt-3">
               <motion.div
                 className="h-px"
@@ -426,7 +424,6 @@ const IccIndex = () => {
             </div>
           </div>
 
-          {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -436,16 +433,15 @@ const IccIndex = () => {
             {LABELS.heroSub[lang]}
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.25, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="flex items-center gap-3"
           >
-            {/* Primary CTA */}
+            {/* Primary CTA — arah ke event pertama atau /events */}
             <motion.button
-              onClick={() => navigate("/events/yicc")}
+              onClick={() => firstEventSlug ? navigate(`/events/${firstEventSlug}`) : navigate("/events")}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               className="relative flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold overflow-hidden"
@@ -456,7 +452,6 @@ const IccIndex = () => {
                 letterSpacing: "0.02em",
               }}
             >
-              {/* Shimmer sweep */}
               <motion.span
                 className="absolute inset-0 -translate-x-full"
                 style={{ background: "linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.15), transparent)" }}
@@ -467,7 +462,6 @@ const IccIndex = () => {
               {LABELS.registerBtn[lang]}
             </motion.button>
 
-            {/* Secondary CTA */}
             <motion.button
               onClick={() => navigate("/events")}
               whileHover={{ scale: 1.03 }}
@@ -479,7 +473,6 @@ const IccIndex = () => {
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -497,13 +490,9 @@ const IccIndex = () => {
         </motion.div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════
-          ABOUT / GOALS
-      ══════════════════════════════════════════════════════════ */}
+      {/* ══ ABOUT / GOALS ══ */}
       <section className="min-h-screen flex flex-col justify-center py-20 md:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-surface/30 border-y border-border/30" />
-
-        {/* BG ornament */}
         <motion.div
           className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-foreground"
           style={{ opacity: 0.03 }}
@@ -555,9 +544,7 @@ const IccIndex = () => {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════
-          COMPETITION CATEGORIES
-      ══════════════════════════════════════════════════════════ */}
+      {/* ══ COMPETITION CATEGORIES ══ */}
       <section className="container min-h-screen flex flex-col justify-center py-20 md:py-28">
         <SectionReveal className="mb-14 text-center space-y-4">
           <p className="text-xs uppercase tracking-[0.45em] font-semibold text-muted-foreground">
@@ -585,11 +572,9 @@ const IccIndex = () => {
                   transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   className="cultural-shell rounded-2xl p-6 h-full flex flex-col cursor-pointer group relative overflow-hidden"
                 >
-                  {/* Corner snowflake */}
                   <div className="absolute -top-5 -right-5 pointer-events-none text-foreground" style={{ opacity: 0.04 }}>
                     <SnowflakeMark size={90} opacity={1} />
                   </div>
-
                   <div className="w-10 h-10 rounded-xl border border-foreground/12 bg-foreground/5 flex items-center justify-center mb-4">
                     <Icon className="h-5 w-5 text-foreground/70" />
                   </div>
@@ -620,9 +605,7 @@ const IccIndex = () => {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════
-          UPCOMING EVENTS
-      ══════════════════════════════════════════════════════════ */}
+      {/* ══ UPCOMING EVENTS ══ */}
       <section className="container min-h-screen flex flex-col justify-center py-20 md:py-28">
         <SectionReveal className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div className="space-y-2">
@@ -646,8 +629,17 @@ const IccIndex = () => {
           </motion.button>
         </SectionReveal>
 
-        {upcomingEvents.length === 0 ? (
-          <SectionReveal className="py-20 text-center text-muted-foreground">{LABELS.noEvents[lang]}</SectionReveal>
+        {loading ? (
+          <SectionReveal className="py-20 text-center text-muted-foreground">
+            <div className="space-y-3">
+              <div className="mx-auto w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-sm">{LABELS.loading[lang]}</p>
+            </div>
+          </SectionReveal>
+        ) : upcomingEvents.length === 0 ? (
+          <SectionReveal className="py-20 text-center text-muted-foreground">
+            {LABELS.noEvents[lang]}
+          </SectionReveal>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {upcomingEvents.map((event, i) => (
@@ -657,8 +649,11 @@ const IccIndex = () => {
         )}
       </section>
 
+      {/* Popup — hanya muncul jika ada event */}
       <AnimatePresence>
-        {showPopup && <EventPopup onClose={() => setShowPopup(false)} />}
+        {showPopup && popupEvent && (
+          <EventPopup event={popupEvent} onClose={() => setShowPopup(false)} />
+        )}
       </AnimatePresence>
     </IccShell>
   );

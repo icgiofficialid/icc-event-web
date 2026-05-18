@@ -247,13 +247,13 @@ export const footerColumns = [
     title: { en: "Event",     id: "Acara" },
     links: [
       { en: "About ICC",    id: "Tentang ICC" },
-      { en: "Timeline",     id: "Timeline" },
+
     ],
   },
   {
     title: { en: "Resources", id: "Sumber Daya" },
     links: [
-      { en: "Guidebook",    id: "Buku Panduan" },
+
       { en: "FAQ",          id: "FAQ" },
     ],
   },
@@ -261,7 +261,6 @@ export const footerColumns = [
     title: { en: "Support",   id: "Dukungan" },
     links: [
       { en: "Contact Team", id: "Tim Kontak" },
-      { en: "Email Support", id: "Dukungan Email" },
       { en: "WhatsApp Help", id: "Bantuan WhatsApp" },
     ],
   },
@@ -276,19 +275,12 @@ export const footerColumns = [
 
 export const footerLinkMap: Record<string, string> = {
   "About ICC":     "/about",
-  "Tentang ICC":   "/about",
-  "Timeline":      "/events/yicc#timeline",
-  "Guidebook":     "/guide",
-  "Buku Panduan":  "/guide",
   "FAQ":           "/faq",
   "Contact Team":  "/contact",
-  "Tim Kontak":    "/contact",
   "Email Support": "mailto:icgi.official.id@gmail.com",
-  "Dukungan Email":"mailto:icgi.official.id@gmail.com",
   "WhatsApp Help": "https://wa.me/628139905880",
-  "Bantuan WhatsApp": "https://wa.me/628139905880",
-  "Instagram":     "https://www.instagram.com/icgi.id",
-  "YouTube":       "/",
+  "Instagram":     "https://www.instagram.com/iccofficial.icgi?igsh=amJsbnNvanFpbW04",
+  "YouTube":       "https://www.youtube.com/@icgiofficial",
 };
 
 // ── PAGE META ─────────────────────────────────────────────────────

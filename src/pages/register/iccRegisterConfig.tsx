@@ -12,7 +12,6 @@ export type ParticipantType = "international" | "indonesian";
 export type CompetitionType = "online" | "offline";
 export type FormData = Record<string, string>;
 
-// Competition categories from YICC guidebook
 export const COMPETITION_CATEGORIES = [
   "Traditional / Cultural-Based Dance Solo",
   "Traditional / Cultural-Based Dance Group",
@@ -51,48 +50,43 @@ export const submitToIccSheet = async (
 ) => {
   const f = (key: string) => form[key] || "";
 
-  // Payload kolom sesuai Excel baru
   const payload: Record<string, string> = {
     sheetTarget,
-    timestamp:                    new Date().toISOString(),
-    CATEGORY_PARTICIPANT:         participant,
-    CATEGORY_COMPETITION:         competition,
-    NAMA_LENGKAP:                 f("NAMA_LENGKAP"),
-    LEADER_WHATSAPP:              f("LEADER_WHATSAPP"),
-    LEADER_EMAIL:                 f("LEADER_EMAIL"),
-    NAMA_SEKOLAH:                 f("NAMA_SEKOLAH"),
-    DIVISION:                     f("DIVISION"),
-    PROVINCE:                     f("PROVINCE"),
-    NAME_SUPERVISOR:              f("NAME_SUPERVISOR"),
-    WHATSAPP_NUMBER_SUPERVISOR:   f("WHATSAPP_NUMBER_SUPERVISOR"),
-    EMAIL_TEACHER_SUPERVISOR:     f("EMAIL_TEACHER_SUPERVISOR"),
-    COMPETITION_CATEGORY:         f("COMPETITION_CATEGORY"),
-    PERFORMANCE_TITLE:            f("PERFORMANCE_TITLE"),
-    CULTURAL_ORIGIN:              f("CULTURAL_ORIGIN"),
-    PERFORMANCE_DESC:             f("PERFORMANCE_DESC"),
-    MEMBER_COUNT:                 f("MEMBER_COUNT"),
-    MUSIC_FILE_LINK:              f("MUSIC_FILE_LINK"),
-    PROPERTY_DECLARATION:         f("PROPERTY_DECLARATION"),
-    COMPLETE_ADDRESS:             f("COMPLETE_ADDRESS"),
-    INFORMATION_RESOURCES:        f("INFORMATION_RESOURCES"),
-    FILE:                         f("FILE"),
+    timestamp:                  new Date().toISOString(),
+    CATEGORY_PARTICIPANT:       participant,
+    CATEGORY_COMPETITION:       competition,
+    NAMA_LENGKAP:               f("NAMA_LENGKAP"),
+    LEADER_WHATSAPP:            f("LEADER_WHATSAPP"),
+    LEADER_EMAIL:               f("LEADER_EMAIL"),
+    NAMA_SEKOLAH:               f("NAMA_SEKOLAH"),
+    DIVISION:                   f("DIVISION"),
+    PROVINCE:                   f("PROVINCE"),
+    NAME_SUPERVISOR:            f("NAME_SUPERVISOR"),
+    WHATSAPP_NUMBER_SUPERVISOR: f("WHATSAPP_NUMBER_SUPERVISOR"),
+    EMAIL_TEACHER_SUPERVISOR:   f("EMAIL_TEACHER_SUPERVISOR"),
+    COMPETITION_CATEGORY:       f("COMPETITION_CATEGORY"),
+    PERFORMANCE_TITLE:          f("PERFORMANCE_TITLE"),
+    CULTURAL_ORIGIN:            f("CULTURAL_ORIGIN"),
+    PERFORMANCE_DESC:           f("PERFORMANCE_DESC"),
+    MEMBER_COUNT:               f("MEMBER_COUNT"),
+    MUSIC_FILE_LINK:            f("MUSIC_FILE_LINK"),
+    PROPERTY_DECLARATION:       f("PROPERTY_DECLARATION"),
+    COMPLETE_ADDRESS:           f("COMPLETE_ADDRESS"),
+    INFORMATION_RESOURCES:      f("INFORMATION_RESOURCES"),
+    FILE:                       f("FILE"),
   };
 
   const queryString = new URLSearchParams(payload).toString();
   const fullUrl = `${sheetUrl}?${queryString}`;
 
-  console.log("=== ICC SUBMIT DEBUG ===");
-  console.log("sheetTarget:", sheetTarget);
-  console.log("Full URL:", fullUrl);
-
-  try {
-    await fetch(fullUrl, { method: "GET", mode: "no-cors" });
-    console.log("fetch: terkirim");
-  } catch (e) {
-    console.error("fetch gagal:", e);
-  }
-
-  console.log("=== SELESAI ===");
+  // Image trick — bypass CORS, request tetap sampai ke GAS
+  await new Promise<void>((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = fullUrl;
+    setTimeout(resolve, 8000);
+  });
 };
 
 // ── Reusable UI Components ────────────────────────────────────────

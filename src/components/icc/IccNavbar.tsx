@@ -58,22 +58,6 @@ const ThemeToggle = () => {
   );
 };
 
-const LangToggle = () => {
-  const { lang, toggle } = useLang();
-  return (
-    <button
-      onClick={toggle}
-      className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-muted transition-colors text-sm font-semibold text-muted-foreground"
-    >
-      {lang === "en" ? (
-        <><img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-5 h-4 rounded-sm object-cover" /><span className="text-xs">EN</span></>
-      ) : (
-        <><img src="https://flagcdn.com/w20/id.png" alt="ID" className="w-5 h-4 rounded-sm object-cover" /><span className="text-xs">ID</span></>
-      )}
-    </button>
-  );
-};
-
 const IccNavbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -176,10 +160,9 @@ const IccNavbar = () => {
           className="hidden items-center gap-1 lg:flex"
         >
           <ThemeToggle />
-          <LangToggle />
 
           <NavLink
-            to="/events/yicc"
+            to="/upcoming-events"
             className="ml-2 flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold tracking-wide transition-all hover:scale-[1.04] hover:shadow-lg active:scale-[0.97]"
             style={{
               background: "hsl(var(--foreground))",
@@ -225,21 +208,7 @@ const IccNavbar = () => {
 
               <div className="flex items-center gap-1 pt-1 border-t border-border/40 mt-1">
                 <ThemeToggle />
-                <LangToggle />
               </div>
-
-              <NavLink
-                to="/events/yicc"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold mt-1"
-                style={{
-                  background: "hsl(var(--foreground))",
-                  color: "hsl(var(--primary-foreground))",
-                }}
-              >
-                <SnowflakeMark size={13} />
-                Register Now
-              </NavLink>
             </div>
           </motion.div>
         )}

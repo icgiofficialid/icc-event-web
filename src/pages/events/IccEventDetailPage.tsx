@@ -1,164 +1,147 @@
 // ================================================================
 // IccEventDetailPage.tsx
 // Path: src/pages/events/IccEventDetailPage.tsx
-//
-// Template halaman detail event ICC — English only.
-// Untuk event ICC baru, buat slim wrapper:
-//   const YICCDetail = () => <IccEventDetailPage slug="yicc-2026" />;
 // ================================================================
 
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Clock, ChevronRight, FileText, ExternalLink } from "lucide-react";
+import {
+  Calendar, MapPin, Clock, FileText, ExternalLink,
+  ArrowLeft, ChevronRight, Check,
+} from "lucide-react";
 import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
 import { useEvent } from "@/hooks/useEvents";
-import {
-  competitionCategories, divisions, judgingCriteria,
-  awards, schedule, domesticSongs,
-} from "@/components/icc/iccData";
 
-// ── Props ─────────────────────────────────────────────────────────
 interface Props { slug: string; }
 
-// ── Static content from ICC 2026 Guidebook ────────────────────────
+// ── Static data ───────────────────────────────────────────────────
 
 const DIVISIONS = [
-  { level: "Primary / Elementary School", age: "7–12 years old",  note: "Student Division" },
-  { level: "Junior High School",          age: "13–15 years old", note: "Student Division" },
-  { level: "Senior High School",          age: "16–18 years old", note: "Student Division" },
-  { level: "Open Division",               age: "University / Community / Studio", note: "No age limit" },
+  { level: "Primary / Elementary",  age: "Age 7–12",                        note: "Student Division" },
+  { level: "Junior High School",    age: "Age 13–15",                       note: "Student Division" },
+  { level: "Senior High School",    age: "Age 16–18",                       note: "Student Division" },
+  { level: "Open Division",         age: "University / Community / Studio", note: "No age limit" },
 ];
 
 const CATEGORIES = [
   {
     letter: "A",
-    color: "from-rose-500 to-pink-600",
-    title: "Traditional / Cultural-Based Dance Solo",
-    description: "A solo dance performance based on traditional culture or cultural heritage. Creative adaptation is allowed as long as the cultural identity remains clear and dominant.",
-    format: "Solo",
-    participants: "1 person",
-    duration: "Max 5 minutes",
-    setupTime: "1 minute",
-    docs: ["Title of dance", "Cultural origin / region / country", "Short performance description", "Music file (MP3/WAV)", "Property declaration (if applicable)"],
+    accent: "#f43f5e",
+    title: "Traditional Dance Solo",
+    subtitle: "Cultural / Heritage-Based",
+    description: "A solo performance rooted in traditional culture or heritage. Creative adaptation is permitted as long as cultural identity remains clear and dominant.",
+    specs: [{ label: "Format", value: "Solo" }, { label: "Members", value: "1 person" }, { label: "Duration", value: "Max 5 min" }, { label: "Setup", value: "1 min" }],
+    docs: ["Title of dance", "Cultural origin / region / country", "Performance description", "Music file (MP3/WAV)", "Property declaration"],
   },
   {
     letter: "B",
-    color: "from-fuchsia-500 to-purple-600",
-    title: "Traditional / Cultural-Based Dance Group",
-    description: "A group dance performance based on traditional culture or cultural heritage. Creative adaptation is allowed as long as the cultural identity remains clear and dominant.",
-    format: "Group",
-    participants: "5–10 persons",
-    duration: "Max 7 minutes",
-    setupTime: "1 minute",
-    docs: ["Title of dance", "Cultural origin / region / country", "Short performance description", "List of members", "Music file (MP3/WAV)", "Property declaration (if applicable)"],
+    accent: "#a855f7",
+    title: "Traditional Dance Group",
+    subtitle: "Cultural / Heritage-Based",
+    description: "A group dance performance rooted in traditional culture or heritage. Cultural identity must remain the dominant element throughout the performance.",
+    specs: [{ label: "Format", value: "Group" }, { label: "Members", value: "5–10 persons" }, { label: "Duration", value: "Max 7 min" }, { label: "Setup", value: "1 min" }],
+    docs: ["Title of dance", "Cultural origin / region / country", "Performance description", "Member list", "Music file (MP3/WAV)", "Property declaration"],
   },
   {
     letter: "C",
-    color: "from-amber-500 to-orange-600",
-    title: "Ethnic / Cultural Creative Costume Show",
-    description: "A costume show presenting traditional or ethnic attire with creative presentation. The costume must clearly represent a cultural identity.",
-    format: "Solo or Group",
-    participants: "1–10 persons",
-    duration: "TBA",
-    setupTime: "TBA",
-    docs: ["Costume title / theme", "Cultural inspiration", "Short costume description", "Music file (MP3/WAV)"],
+    accent: "#f59e0b",
+    title: "Ethnic Costume Show",
+    subtitle: "Cultural Creative Presentation",
+    description: "A costume presentation showcasing traditional or ethnic attire with creative flair. The costume must clearly represent a distinct cultural identity.",
+    specs: [{ label: "Format", value: "Solo or Group" }, { label: "Members", value: "1–10 persons" }, { label: "Duration", value: "TBA" }, { label: "Setup", value: "TBA" }],
+    docs: ["Costume title / theme", "Cultural inspiration", "Costume description", "Music file (MP3/WAV)"],
   },
   {
     letter: "D",
-    color: "from-teal-500 to-cyan-600",
+    accent: "#14b8a6",
     title: "Traditional Song Solo",
-    description: "A solo vocal performance presenting a traditional or cultural song. Domestic participants must select from the official song list. International participants may present a traditional song from their own country.",
-    format: "Solo",
-    participants: "1 person",
-    duration: "TBA",
-    setupTime: "TBA",
-    docs: ["Song title", "Cultural origin / region / country", "Short song description or meaning", "Instrumental backing track", "Lyrics (if required)"],
+    subtitle: "Vocal Performance",
+    description: "A solo vocal performance of a traditional or cultural song. Domestic participants must choose from the official song list. International participants may present a song from their own culture.",
+    specs: [{ label: "Format", value: "Solo" }, { label: "Members", value: "1 person" }, { label: "Duration", value: "TBA" }, { label: "Setup", value: "TBA" }],
+    docs: ["Song title", "Cultural origin / region / country", "Song description or meaning", "Instrumental backing track", "Lyrics (if required)"],
   },
 ];
 
-const JUDGING_DANCE = [
-  { aspect: "Technique & Execution",               weight: "30%" },
-  { aspect: "Cultural Interpretation / Authenticity", weight: "25%" },
-  { aspect: "Choreography / Composition",          weight: "20%" },
-  { aspect: "Stage Presence & Expression",         weight: "15%" },
-  { aspect: "Costume & Overall Presentation",      weight: "10%" },
+const JUDGING = [
+  {
+    label: "Dance — Solo & Group",
+    accent: "#f43f5e",
+    criteria: [
+      { aspect: "Technique & Execution",                weight: "30%" },
+      { aspect: "Cultural Interpretation / Authenticity", weight: "25%" },
+      { aspect: "Choreography / Composition",           weight: "20%" },
+      { aspect: "Stage Presence & Expression",          weight: "15%" },
+      { aspect: "Costume & Overall Presentation",       weight: "10%" },
+    ],
+  },
+  {
+    label: "Costume Show",
+    accent: "#a855f7",
+    criteria: [
+      { aspect: "Cultural Authenticity & Identity",     weight: "30%" },
+      { aspect: "Creativity & Aesthetic Quality",       weight: "25%" },
+      { aspect: "Craftsmanship & Detail",               weight: "20%" },
+      { aspect: "Stage Presentation & Confidence",      weight: "15%" },
+      { aspect: "Overall Impact",                       weight: "10%" },
+    ],
+  },
+  {
+    label: "Traditional Song Solo",
+    accent: "#14b8a6",
+    criteria: [
+      { aspect: "Vocal Technique & Intonation",         weight: "30%" },
+      { aspect: "Cultural Authenticity",                weight: "25%" },
+      { aspect: "Musicality & Expression",              weight: "20%" },
+      { aspect: "Stage Presence",                       weight: "15%" },
+      { aspect: "Costume & Overall Presentation",       weight: "10%" },
+    ],
+  },
 ];
 
-const JUDGING_COSTUME = [
-  { aspect: "Cultural Authenticity & Identity",    weight: "30%" },
-  { aspect: "Creativity & Aesthetic Quality",      weight: "25%" },
-  { aspect: "Craftsmanship & Detail",              weight: "20%" },
-  { aspect: "Stage Presentation & Confidence",     weight: "15%" },
-  { aspect: "Overall Impact",                      weight: "10%" },
-];
-
-const JUDGING_VOCAL = [
-  { aspect: "Vocal Technique & Intonation",        weight: "30%" },
-  { aspect: "Cultural Authenticity",               weight: "25%" },
-  { aspect: "Musicality & Expression",             weight: "20%" },
-  { aspect: "Stage Presence",                      weight: "15%" },
-  { aspect: "Costume & Overall Presentation",      weight: "10%" },
-];
-
-const JUDGING_SHOW = [
-  { aspect: "Cultural Authenticity & Identity",    weight: "30%" },
-  { aspect: "Creativity & Aesthetic Quality",      weight: "25%" },
-  { aspect: "Craftsmanship & Detail",              weight: "20%" },
-  { aspect: "Stage Presentation & Confidence",     weight: "15%" },
-  { aspect: "Overall Impact",                      weight: "10%" },
+const AWARDS = [
+  { tier: "01", label: "Gold Award",               note: "Highest distinction" },
+  { tier: "02", label: "Silver Award",             note: "Outstanding performance" },
+  { tier: "03", label: "Bronze Award",             note: "Commendable performance" },
+  { tier: "04", label: "Honorable Mention",        note: "Special recognition" },
+  { tier: "05", label: "Certificate of Participation", note: "All participants" },
+  { tier: "06", label: "Winner of Each Category",  note: "Category champion" },
+  { tier: "07", label: "Special Awards",           note: "Committee selection" },
 ];
 
 const SCHEDULE = [
-  {
-    day: 1,
-    title: "Opening & Technical Meeting",
-    highlights: ["Opening Ceremony", "Technical Meeting / Briefing for Cultural Participants", "Registration & Accreditation"],
-  },
-  {
-    day: 2,
-    title: "Technical Rehearsal",
-    highlights: ["Technical Rehearsal (Dance Solo: 3 min | Dance Group: 5 min)", "Stage Checking & Sound Check", "Costume Preparation"],
-  },
-  {
-    day: 3,
-    title: "Cultural Main Competition",
-    highlights: ["Main Competition Day", "All performance categories", "Judging Session"],
-  },
-  {
-    day: 4,
-    title: "Gala Night & Cultural Expo",
-    highlights: ["Cultural Expo / Booth", "Gala Night", "Cultural Showcase / Exchange Performance (non-competitive, voluntary or by invitation)"],
-  },
-  {
-    day: 5,
-    title: "Awarding Ceremony",
-    highlights: ["Awarding Ceremony", "Certificate Distribution", "Closing"],
-  },
+  { day: "01", title: "Opening & Briefing",       items: ["Opening Ceremony", "Technical Meeting for Cultural Participants", "Registration & Accreditation"] },
+  { day: "02", title: "Technical Rehearsal",      items: ["Technical Rehearsal — Dance Solo: 3 min / Dance Group: 5 min", "Stage & Sound Check", "Costume Preparation"] },
+  { day: "03", title: "Main Competition",         items: ["Cultural Main Competition Day", "All performance categories judged", "Judging Session"] },
+  { day: "04", title: "Gala Night & Expo",        items: ["Cultural Expo / Community Booth", "Gala Night Showcase", "Exchange Performances — non-competitive, voluntary or by invitation"] },
+  { day: "05", title: "Awarding Ceremony",        items: ["Awarding & Recognition Ceremony", "Certificate Distribution", "Closing"] },
 ];
 
-const GENERAL_RULES = [
-  "All required technical files and supporting information must be submitted no later than 14 days before the event (H-14).",
-  "The performance order will be determined by the committee. Requests to change the assigned schedule will not be accepted.",
-  "Participants who are late may lose their performance opportunity, subject to committee decision.",
-  "Music must be submitted in advance in MP3 / WAV format. Participants must also bring backup files on the event day.",
-  "Prohibited stage properties include fire, smoke, liquids, sharp weapons, glass or breakable materials, dangerous substances, live animals, confetti, and glitter.",
-  "Costumes must remain appropriate for a public cultural competition.",
+const RULES = [
+  "All required technical files must be submitted no later than 14 days before the event (H-14).",
+  "Performance order is determined by the committee. Schedule change requests will not be accommodated.",
+  "Late participants may forfeit their performance slot, subject to committee discretion.",
+  "Music files must be submitted in advance in MP3 or WAV format. Backup copies must be brought on event day.",
+  "Prohibited properties: fire, smoke, liquids, sharp weapons, glass, breakable materials, live animals, confetti, and glitter.",
+  "Costumes must remain appropriate for a public cultural event.",
   "Performances must not contain hate speech, offensive content, explicit violence, or inappropriate material.",
   "All jury decisions are final and cannot be contested.",
 ];
 
-// ── Helper ────────────────────────────────────────────────────────
-function GradientText({ children, from, to }: { children: React.ReactNode; from: string; to: string }) {
-  return (
-    <span style={{
-      WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-      backgroundClip: "text", backgroundImage: `linear-gradient(135deg, ${from}, ${to})`,
-    }}>
-      {children}
-    </span>
-  );
-}
+const GENERAL_DOCS = [
+  "Registration form",
+  "Participant identity card / student card / passport",
+  "Participant or team photo",
+  "Institution / community / studio information",
+  "Consent for documentation and publication",
+];
+
+const OBJECTIVES = [
+  "Provide an international platform for cultural-based performances.",
+  "Encourage appreciation and preservation of traditional arts and heritage.",
+  "Promote intercultural exchange across regions and countries.",
+  "Support young talents and communities in presenting cultural identity.",
+];
 
 // ── Component ─────────────────────────────────────────────────────
 const IccEventDetailPage = ({ slug }: Props) => {
@@ -173,9 +156,8 @@ const IccEventDetailPage = ({ slug }: Props) => {
   if (loading) {
     return (
       <IccShell>
-        <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
-          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading event…</p>
+        <div className="flex min-h-[70vh] items-center justify-center">
+          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
         </div>
       </IccShell>
     );
@@ -184,115 +166,134 @@ const IccEventDetailPage = ({ slug }: Props) => {
   if (!event) {
     return (
       <IccShell>
-        <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 text-center">
-          <p className="text-6xl">🎭</p>
+        <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center px-4">
           <h1 className="text-2xl font-bold">Event not found</h1>
-          <p className="text-muted-foreground text-sm max-w-xs">
-            This event doesn't exist or has been removed.
-          </p>
-          <button
-            onClick={() => navigate("/events")}
-            className="mt-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-          >
-            ← Back to Events
+          <p className="text-muted-foreground text-sm max-w-xs">This event doesn't exist or has been removed.</p>
+          <button onClick={() => navigate("/events")}
+            className="flex items-center gap-2 text-sm font-medium hover:opacity-70 transition-opacity">
+            <ArrowLeft className="h-4 w-4" /> Back to Events
           </button>
         </div>
       </IccShell>
     );
   }
 
-  const accentColor  = event.accentColor  || "hsl(38 95% 55%)";
-  const accentColor2 = "#f43f5e";
+  const accent        = event.accentColor   || "#f43f5e";
+  const accent2       = "#f59e0b";
   const coverGradient = event.coverGradient || "from-rose-950 via-fuchsia-950 to-amber-950";
-  const tags = event.tags ?? [];
-
-  const titleWords  = event.title.split(" ");
-  const firstWord   = titleWords[0];
-  const middleWords = titleWords.length > 2
-    ? titleWords.slice(1, -1).join(" ")
-    : titleWords.slice(1).join(" ");
-  const lastWord = titleWords.length > 2 ? titleWords[titleWords.length - 1] : null;
-
+  const tags          = event.tags ?? [];
   const registrationOpen = !!event.registrationUrl;
+
+  // Split title for gradient styling
+  const words      = event.title.split(" ");
+  const firstWord  = words[0];
+  const midWords   = words.length > 2 ? words.slice(1, -1).join(" ") : words.slice(1).join(" ");
+  const lastWord   = words.length > 2 ? words[words.length - 1] : null;
 
   return (
     <IccShell>
 
       {/* ── HERO ────────────────────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-end pb-16 overflow-hidden">
+      <section className="relative min-h-[90svh] flex flex-col justify-end pb-12 md:pb-20 overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${coverGradient}`} />
-        <div className="absolute inset-0 opacity-40" style={{
-          background: `radial-gradient(ellipse at 25% 30%, ${accentColor}40 0%, transparent 55%),
-                       radial-gradient(ellipse at 75% 70%, ${accentColor2}4D 0%, transparent 55%)`,
+        <div className="absolute inset-0" style={{
+          background: `radial-gradient(ellipse 60% 60% at 20% 20%, ${accent}33 0%, transparent 60%),
+                       radial-gradient(ellipse 50% 50% at 80% 80%, ${accent2}22 0%, transparent 60%)`,
         }} />
-        <div className="absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        <div className="absolute inset-0 opacity-[0.04]" style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
         }} />
 
-        <div className="container relative z-10">
+        {/* Top bar */}
+        <div className="absolute top-0 left-0 right-0 px-4 md:px-6 py-5 z-10 flex items-center justify-between">
           <button onClick={() => navigate("/events")}
-            className="mb-6 text-white/60 hover:text-white text-sm transition-colors flex items-center gap-1">
-            ← Back to Events
+            className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs md:text-sm transition-colors">
+            <ArrowLeft className="h-3.5 w-3.5 md:h-4 md:w-4" /> Back to Events
           </button>
+          <span className="text-[9px] md:text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 border border-white/15 rounded-full px-2.5 py-1">
+            {event.type} · {event.year}
+          </span>
+        </div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
-            className="space-y-4 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
-                {event.type}
-              </span>
-              {event.year && (
-                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
-                  {event.year}
-                </span>
-              )}
-              {tags.slice(0, 3).map(tag => (
-                <span key={tag} className="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[10px] font-medium text-white/80 uppercase tracking-widest">
-                  {tag}
-                </span>
-              ))}
-            </div>
+        {/* Hero content */}
+        <div className="container px-4 md:px-6 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-4xl"
+          >
+            {/* Tags */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-5">
+                {tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-white/50 border border-white/15 rounded-full px-2.5 py-1">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
-            <h1 className="font-display text-4xl md:text-6xl font-bold text-white leading-tight">
+            {/* Title */}
+            <h1 className="font-display text-[2.6rem] leading-[0.92] md:text-6xl lg:text-7xl font-bold text-white mb-5">
               {firstWord}<br />
-              <GradientText from={accentColor} to={accentColor2}>{middleWords}</GradientText>
+              <span style={{
+                backgroundImage: `linear-gradient(135deg, ${accent}, ${accent2})`,
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              }}>
+                {midWords}
+              </span>
               {lastWord && <><br />{lastWord}</>}
             </h1>
 
+            {/* Description */}
             {event.description && (
-              <p className="text-white/70 text-base leading-7 max-w-xl">{event.description}</p>
+              <p className="text-white/55 text-sm md:text-base leading-7 max-w-xl mb-6">{event.description}</p>
             )}
 
-            <div className="flex flex-wrap gap-4 pt-2 text-sm text-white/60">
-              {event.location && <div className="flex items-center gap-2"><MapPin className="h-4 w-4" />{event.location}</div>}
-              {event.dateRange && <div className="flex items-center gap-2"><Calendar className="h-4 w-4" />{event.dateRange}</div>}
-              {event.registrationDeadline && (
-                <div className="flex items-center gap-2">
-                  {/* <Clock className="h-4 w-4" />Registration Deadline: {event.registrationDeadline} */}
-                </div>
+            {/* Meta row */}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-5 mb-7 text-xs md:text-sm text-white/50">
+              {event.location && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" /> {event.location}
+                </span>
+              )}
+              {event.dateRange && (
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" /> {event.dateRange}
+                </span>
+              )}
+              {event.registrationDeadline && event.registrationDeadline !== "TBA" && (
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" /> Deadline: {event.registrationDeadline}
+                </span>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-3 pt-2">
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-3">
               {registrationOpen ? (
                 <button onClick={handleRegister}
-                  className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm hover:brightness-110 transition-all"
-                  style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor2})`, color: "#fff" }}>
+                  className="group flex items-center gap-2 rounded-xl px-6 py-3 md:px-7 md:py-3.5 font-bold text-sm text-white hover:opacity-90 transition-all"
+                  style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})` }}>
                   Register Now
+                  <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               ) : (
-                <span className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm bg-white/10 border border-white/20 text-white/50 cursor-not-allowed">
+                <span className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm bg-white/8 border border-white/15 text-white/40 cursor-not-allowed">
                   Registration Closed
                 </span>
               )}
               {event.guidebookUrl ? (
                 <a href={event.guidebookUrl} target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 transition-all">
-                  <FileText className="h-4 w-4" /> Guidebook <ExternalLink className="h-3 w-3 opacity-60" />
+                  className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/8 px-5 py-3 text-sm font-semibold text-white/80 hover:bg-white/15 transition-all">
+                  <FileText className="h-4 w-4" /> Guidebook
+                  <ExternalLink className="h-3 w-3 opacity-50" />
                 </a>
               ) : (
                 <a href="/guide"
-                  className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 transition-all">
+                  className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/8 px-5 py-3 text-sm font-semibold text-white/80 hover:bg-white/15 transition-all">
                   <FileText className="h-4 w-4" /> Guidebook
                 </a>
               )}
@@ -301,135 +302,143 @@ const IccEventDetailPage = ({ slug }: Props) => {
         </div>
       </section>
 
-      {/* ── BACKGROUND & OBJECTIVES ─────────────────────────────── */}
-      <section className="container py-20">
-        <SectionReveal className="mb-10 text-center space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor }}>About</p>
-          <h2 className="text-3xl font-bold font-display">Background & Objectives</h2>
-        </SectionReveal>
-        <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
-          <SectionReveal>
-            <div className="cultural-shell rounded-2xl p-8 h-full">
-              <h3 className="font-bold text-foreground mb-4 text-base">Background</h3>
+      {/* ── ABOUT ───────────────────────────────────────────────── */}
+      <section className="container px-4 md:px-6 py-16 md:py-24">
+        <SectionReveal>
+          <div className="grid md:grid-cols-[1fr_2px_1fr] gap-8 md:gap-10 max-w-5xl items-start">
+            <div>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase mb-3" style={{ color: accent }}>Background</p>
               <p className="text-muted-foreground text-sm leading-7">
-                Culture is one of the most valuable identities of a nation, region, and community. In the modern era, cultural expression continues to evolve and adapt to contemporary trends, yet its roots, values, and local identity must continue to be preserved and appreciated.
+                Culture is one of the most valuable identities of a nation, region, and community. In the modern era, cultural expression continues to evolve, yet its roots, values, and local identity must continue to be preserved and appreciated.
               </p>
-              <p className="text-muted-foreground text-sm leading-7 mt-3">
-                ICC is designed as an international platform for cultural-based competition that highlights traditional arts, ethnic identity, and creative cultural presentation. The event is expected to encourage cultural pride, cross-cultural understanding, and the sustainability of traditional arts.
+              <p className="text-muted-foreground text-sm leading-7 mt-4">
+                ICC is designed as an international platform for cultural-based competition — highlighting traditional arts, ethnic identity, and creative cultural presentation.
               </p>
             </div>
-          </SectionReveal>
-          <SectionReveal delay={0.1}>
-            <div className="cultural-shell rounded-2xl p-8 h-full">
-              <h3 className="font-bold text-foreground mb-4 text-base">Objectives</h3>
-              <ul className="space-y-3">
-                {[
-                  "Provide an international competition platform for cultural-based performances.",
-                  "Encourage appreciation and preservation of traditional arts and cultural heritage.",
-                  "Promote intercultural exchange among participants from different regions and countries.",
-                  "Support young talents, communities, and cultural groups in presenting their cultural identity.",
-                ].map((obj, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
-                      style={{ background: `${accentColor}20`, color: accentColor }}>{i + 1}</span>
-                    {obj}
+            <div className="hidden md:block bg-border/50 self-stretch" />
+            <div>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase mb-3 mt-6 md:mt-0" style={{ color: accent }}>Objectives</p>
+              <ul className="space-y-4">
+                {OBJECTIVES.map((obj, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="text-[10px] font-bold mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ background: `${accent}18`, color: accent }}>
+                      {i + 1}
+                    </span>
+                    <span className="text-muted-foreground text-sm leading-6">{obj}</span>
                   </li>
                 ))}
               </ul>
             </div>
-          </SectionReveal>
-        </div>
+          </div>
+        </SectionReveal>
       </section>
 
-      {/* ── PARTICIPANT DIVISIONS ────────────────────────────────── */}
-      <section className="bg-surface/60 border-y border-border/40 py-20">
-        <div className="container">
-          <SectionReveal className="mb-10 text-center space-y-2">
-            <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor }}>Who Can Join</p>
-            <h2 className="text-3xl font-bold font-display">Participant Divisions</h2>
-            <p className="text-muted-foreground text-sm">Open to all school levels, universities, and communities</p>
+      {/* ── DIVISIONS ───────────────────────────────────────────── */}
+      <section className="border-y border-border/50 py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <SectionReveal className="mb-8 md:mb-12">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: accent }}>Who Can Join</p>
+            <h2 className="text-2xl md:text-3xl font-bold font-display">Participant Divisions</h2>
           </SectionReveal>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl">
             {DIVISIONS.map((div, i) => (
-              <SectionReveal key={i} delay={i * 0.08}>
-                <div className="cultural-shell rounded-2xl p-5 text-center space-y-2">
-                  <div className="text-3xl"></div>
-                  <h3 className="font-bold text-foreground text-sm">{div.level}</h3>
-                  <p className="text-xs text-muted-foreground">{div.age}</p>
-                  <span className="inline-block rounded-full px-3 py-1 text-[10px] font-semibold"
-                    style={{ background: `${accentColor}1F`, color: accentColor }}>
+              <SectionReveal key={i} delay={i * 0.07}>
+                <div className="rounded-2xl border border-border/60 p-4 md:p-6 hover:border-border transition-colors h-full">
+                  <div className="text-3xl md:text-4xl font-bold font-display mb-3 leading-none"
+                    style={{ color: `${accent}40` }}>0{i + 1}</div>
+                  <h3 className="font-bold text-foreground text-xs md:text-sm mb-1">{div.level}</h3>
+                  <p className="text-[11px] md:text-xs text-muted-foreground mb-3">{div.age}</p>
+                  <span className="inline-block text-[9px] md:text-[10px] font-bold uppercase tracking-wider rounded-full px-2.5 py-1"
+                    style={{ background: `${accent}12`, color: accent }}>
                     {div.note}
                   </span>
                 </div>
               </SectionReveal>
             ))}
           </div>
-          <SectionReveal className="mt-6 max-w-3xl mx-auto">
-            <div className="rounded-xl p-4 text-sm text-muted-foreground leading-6"
-              style={{ background: `${accentColor}0F`, border: `1px solid ${accentColor}30` }}>
-              <strong className="text-foreground">Open Division</strong> is intended for university students, communities, cultural studios / sanggar, and general participants. No age limit applies. International participants are required to present cultural works that represent the tradition, identity, or artistic heritage of their country, region, city, or cultural community of origin.
-            </div>
+          <SectionReveal className="mt-5 max-w-3xl">
+            <p className="text-xs text-muted-foreground leading-6 border-l-2 pl-4" style={{ borderColor: `${accent}50` }}>
+              <strong className="text-foreground">Open Division</strong> is open to university students, communities, cultural studios, and general participants with no age limit. International participants must present cultural works representing the tradition or artistic heritage of their origin.
+            </p>
           </SectionReveal>
         </div>
       </section>
 
-      {/* ── COMPETITION CATEGORIES ───────────────────────────────── */}
-      <section className="container py-20">
-        <SectionReveal className="mb-10 text-center space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor2 }}>Performances</p>
-          <h2 className="text-3xl font-bold font-display">Competition Categories</h2>
+      {/* ── CATEGORIES ──────────────────────────────────────────── */}
+      <section className="container px-4 md:px-6 py-16 md:py-24">
+        <SectionReveal className="mb-8 md:mb-12">
+          <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: accent2 }}>Performances</p>
+          <h2 className="text-2xl md:text-3xl font-bold font-display">Competition Categories</h2>
         </SectionReveal>
-        <div className="grid gap-5 sm:grid-cols-2 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-4 md:gap-5 max-w-5xl">
           {CATEGORIES.map((cat, i) => (
-            <SectionReveal key={cat.letter} delay={i * 0.08}>
-              <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.22 }}
-                className="cultural-shell rounded-2xl p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl`}>
+            <SectionReveal key={cat.letter} delay={i * 0.07}>
+              <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2 }}
+                className="rounded-2xl border border-border/60 p-5 md:p-7 flex flex-col h-full hover:border-border transition-colors">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: cat.accent }}>{cat.subtitle}</p>
+                    <h3 className="font-bold text-foreground text-sm md:text-base leading-snug">{cat.title}</h3>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Category {cat.letter}</span>
-                    <h3 className="font-bold text-foreground text-sm leading-snug">{cat.title}</h3>
-                  </div>
+                  <span className="text-4xl md:text-5xl font-bold font-display leading-none shrink-0 ml-3"
+                    style={{ color: `${cat.accent}20` }}>
+                    {cat.letter}
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-6 flex-1">{cat.description}</p>
-                <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-                  <div><span className="font-semibold text-foreground">Format:</span> {cat.format}</div>
-                  <div><span className="font-semibold text-foreground">Members:</span> {cat.participants}</div>
-                  <div><span className="font-semibold text-foreground">Duration:</span> {cat.duration}</div>
-                  <div><span className="font-semibold text-foreground">Setup:</span> {cat.setupTime}</div>
+                <p className="text-xs text-muted-foreground leading-6 flex-1 mb-4">{cat.description}</p>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {cat.specs.map(s => (
+                    <div key={s.label} className="rounded-lg px-3 py-2" style={{ background: `${cat.accent}08` }}>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
+                      <p className="text-xs font-semibold text-foreground">{s.value}</p>
+                    </div>
+                  ))}
                 </div>
+                <div className="h-px bg-border/50 mb-3" />
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Required Docs</p>
+                <ul className="space-y-1.5">
+                  {cat.docs.map((doc, j) => (
+                    <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="w-1 h-1 rounded-full shrink-0" style={{ background: cat.accent }} />
+                      {doc}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             </SectionReveal>
           ))}
         </div>
       </section>
 
-      {/* ── JUDGING CRITERIA ────────────────────────────────────── */}
-      <section className="bg-surface/60 border-y border-border/40 py-20">
-        <div className="container">
-          <SectionReveal className="mb-10 text-center space-y-2">
-            <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: "hsl(270 70% 65%)" }}>Assessment</p>
-            <h2 className="text-3xl font-bold font-display">Judging Criteria</h2>
-            <p className="text-muted-foreground text-sm">The following criteria are the current draft basis and remain subject to final committee confirmation.</p>
+      {/* ── JUDGING ─────────────────────────────────────────────── */}
+      <section className="border-y border-border/50 py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <SectionReveal className="mb-8 md:mb-12">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: "hsl(270 70% 65%)" }}>Assessment</p>
+            <h2 className="text-2xl md:text-3xl font-bold font-display">Judging Criteria</h2>
+            <p className="text-muted-foreground text-sm mt-2">Subject to final committee confirmation.</p>
           </SectionReveal>
-          <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-            {[
-              { label: "Dance (Solo & Group)", criteria: JUDGING_DANCE,    color: accentColor2 },
-              { label: "Costume Show",          criteria: JUDGING_COSTUME,  color: "hsl(270 70% 60%)" },
-              { label: "Traditional Song Solo", criteria: JUDGING_VOCAL,    color: "hsl(175 70% 45%)" },
-            ].map(({ label, criteria, color }) => (
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl">
+            {JUDGING.map(({ label, accent: a, criteria }) => (
               <SectionReveal key={label}>
-                <div className="cultural-shell rounded-2xl p-6 h-full">
-                  <div className="flex items-center gap-2 mb-5">
-                    <span className="text-xl"></span>
+                <div className="rounded-2xl border border-border/60 p-5 md:p-6 h-full">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full" style={{ background: a }} />
                     <h3 className="font-bold text-foreground text-sm">{label}</h3>
                   </div>
-                  <div className="space-y-3">
+                  <div className="h-px bg-border/50 my-4" />
+                  <div className="space-y-4">
                     {criteria.map((c, i) => (
-                      <div key={i} className="flex items-center justify-between gap-2">
-                        <span className="text-xs text-muted-foreground flex-1">{c.aspect}</span>
-                        <span className="text-xs font-bold shrink-0" style={{ color }}>{c.weight}</span>
+                      <div key={i}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs text-muted-foreground">{c.aspect}</span>
+                          <span className="text-xs font-bold" style={{ color: a }}>{c.weight}</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-border/50 overflow-hidden">
+                          <div className="h-full rounded-full transition-all"
+                            style={{ width: c.weight, background: `${a}60` }} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -441,52 +450,58 @@ const IccEventDetailPage = ({ slug }: Props) => {
       </section>
 
       {/* ── AWARDS ──────────────────────────────────────────────── */}
-      <section className="container py-20">
-        <SectionReveal className="mb-10 text-center space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor }}>Recognition</p>
-          <h2 className="text-3xl font-bold font-display">Awards & Recognition</h2>
-          <p className="text-muted-foreground text-sm">Appreciation-based award system using passing grades. Final score bands will be determined in the official guidebook.</p>
+      <section className="container px-4 md:px-6 py-16 md:py-24">
+        <SectionReveal className="mb-8 md:mb-12">
+          <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: accent }}>Recognition</p>
+          <h2 className="text-2xl md:text-3xl font-bold font-display">Awards</h2>
+          <p className="text-muted-foreground text-sm mt-2">Appreciation-based system using passing grades. Final score bands will be confirmed in the official guidebook.</p>
         </SectionReveal>
-        <div className="flex flex-wrap justify-center gap-4">
-          {JUDGING_SHOW.map((award, i) => (
-            <SectionReveal key={i} delay={i * 0.07}>
-              <motion.div whileHover={{ scale: 1.04 }} transition={{ duration: 0.2 }}
-                className="cultural-shell rounded-2xl px-6 py-5 flex flex-col items-center gap-2 min-w-[130px]">
-                <span className="text-3xl"></span>
-                <span className="text-sm font-bold text-foreground text-center">{award.aspect}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl">
+          {AWARDS.map((award, i) => (
+            <SectionReveal key={i} delay={i * 0.06}>
+              <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.18 }}
+                className="rounded-xl border border-border/60 px-4 py-3.5 md:px-5 md:py-4 hover:border-border transition-colors">
+                <p className="text-[10px] font-bold text-muted-foreground/40 mb-1">{award.tier}</p>
+                <p className="font-bold text-foreground text-xs md:text-sm mb-0.5">{award.label}</p>
+                <p className="text-[10px] md:text-[11px] text-muted-foreground">{award.note}</p>
               </motion.div>
             </SectionReveal>
           ))}
         </div>
       </section>
 
-      {/* ── EVENT SCHEDULE ───────────────────────────────────────── */}
-      <section className="bg-surface/60 border-y border-border/40 py-20">
-        <div className="container">
-          <SectionReveal className="mb-10 text-center space-y-2">
-            <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor2 }}>Itinerary</p>
-            <h2 className="text-3xl font-bold font-display">Event Schedule</h2>
-            <p className="text-muted-foreground text-sm">5 days of culture, performance, and celebration (Tentative)</p>
+      {/* ── SCHEDULE ────────────────────────────────────────────── */}
+      <section className="border-y border-border/50 py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <SectionReveal className="mb-8 md:mb-12">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: accent2 }}>Itinerary</p>
+            <h2 className="text-2xl md:text-3xl font-bold font-display">Event Schedule</h2>
+            <p className="text-muted-foreground text-sm mt-2">5 days — tentative</p>
           </SectionReveal>
-          <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="max-w-2xl">
             {SCHEDULE.map((day, i) => (
-              <SectionReveal key={day.day} delay={i * 0.07}>
-                <div className="cultural-shell rounded-2xl p-5 flex gap-4">
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
-                      style={{ background: i % 2 === 0 ? `${accentColor}26` : `${accentColor2}26` }}>
-                      
+              <SectionReveal key={day.day} delay={i * 0.06}>
+                <div className="flex gap-4 md:gap-6">
+                  <div className="flex flex-col items-center shrink-0 w-9 md:w-12">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 flex items-center justify-center text-[10px] md:text-xs font-bold"
+                      style={{
+                        borderColor: i < SCHEDULE.length - 1 ? `${accent}40` : accent,
+                        color: accent,
+                        background: i === 2 ? `${accent}12` : "transparent",
+                      }}>
+                      {day.day}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Day {day.day}</span>
+                    {i < SCHEDULE.length - 1 && (
+                      <div className="flex-1 w-px my-2" style={{ background: `${accent}20` }} />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-foreground mb-2">{day.title}</h3>
-                    <ul className="space-y-1">
-                      {day.highlights.map((item, j) => (
+                  <div className="pb-7 md:pb-8 flex-1 min-w-0">
+                    <h3 className="font-bold text-foreground text-sm mb-2">{day.title}</h3>
+                    <ul className="space-y-1.5">
+                      {day.items.map((item, j) => (
                         <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <ChevronRight className="h-3 w-3 shrink-0 mt-0.5"
-                            style={{ color: i % 2 === 0 ? accentColor : accentColor2 }} />
-                          {item}
+                          <ChevronRight className="h-3 w-3 shrink-0 mt-0.5" style={{ color: `${accent}70` }} />
+                          <span>{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -498,97 +513,100 @@ const IccEventDetailPage = ({ slug }: Props) => {
         </div>
       </section>
 
-      {/* ── REQUIRED DOCUMENTS ──────────────────────────────────── */}
-      <section className="container py-20">
-        <SectionReveal className="mb-10 text-center space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor }}>Submission</p>
-          <h2 className="text-3xl font-bold font-display">Required Documents</h2>
-          <p className="text-muted-foreground text-sm">All documents must be submitted no later than H-14 before the event.</p>
+      {/* ── DOCUMENTS ───────────────────────────────────────────── */}
+      <section className="container px-4 md:px-6 py-16 md:py-24">
+        <SectionReveal className="mb-8 md:mb-12">
+          <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: accent }}>Submission</p>
+          <h2 className="text-2xl md:text-3xl font-bold font-display">Required Documents</h2>
+          <p className="text-muted-foreground text-sm mt-2">All files must be submitted no later than H-14 before the event.</p>
         </SectionReveal>
-
-        {/* General documents */}
-        <SectionReveal className="mb-8 max-w-3xl mx-auto">
-          <div className="cultural-shell rounded-2xl p-6">
-            <h3 className="font-bold text-foreground mb-4">General Documents (All Categories)</h3>
-            <div className="grid sm:grid-cols-2 gap-2">
-              {[
-                "Registration form",
-                "Participant identity card / student card / passport",
-                "Participant or team photo",
-                "Institution / community / studio information",
-                "Consent for documentation and publication",
-              ].map((doc, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <span className="mt-0.5 shrink-0" style={{ color: accentColor }}>•</span>{doc}
-                </div>
-              ))}
-            </div>
-          </div>
-        </SectionReveal>
-
-        {/* Per-category documents */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-          {CATEGORIES.map((cat, i) => (
-            <SectionReveal key={cat.letter} delay={i * 0.08}>
-              <div className="cultural-shell rounded-2xl p-5 h-full">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xl"></span>
-                  <h3 className="font-bold text-foreground text-xs leading-snug">Category {cat.letter}</h3>
-                </div>
-                <ul className="space-y-2">
-                  {cat.docs.map((doc, j) => (
-                    <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <span className="mt-0.5 shrink-0" style={{ color: accentColor }}>•</span>{doc}
-                    </li>
-                  ))}
-                </ul>
+        <div className="max-w-5xl space-y-4">
+          <SectionReveal>
+            <div className="rounded-2xl border border-border/60 p-5 md:p-7">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">General — All Categories</p>
+              <div className="grid sm:grid-cols-2 gap-2.5">
+                {GENERAL_DOCS.map((doc, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: accent }} />
+                    {doc}
+                  </div>
+                ))}
               </div>
-            </SectionReveal>
-          ))}
+            </div>
+          </SectionReveal>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {CATEGORIES.map((cat, i) => (
+              <SectionReveal key={cat.letter} delay={i * 0.07}>
+                <div className="rounded-2xl border border-border/60 p-4 md:p-5 h-full">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center shrink-0"
+                      style={{ background: `${cat.accent}15`, color: cat.accent }}>
+                      {cat.letter}
+                    </span>
+                    <h3 className="font-bold text-foreground text-[11px] md:text-xs leading-snug">{cat.title}</h3>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {cat.docs.map((doc, j) => (
+                      <li key={j} className="flex items-start gap-1.5 text-[10px] md:text-[11px] text-muted-foreground">
+                        <span className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: cat.accent }} />
+                        {doc}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </SectionReveal>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── GENERAL COMPETITION RULES ────────────────────────────── */}
-      <section className="bg-surface/60 border-y border-border/40 py-20">
-        <div className="container">
-          <SectionReveal className="mb-10 text-center space-y-2">
-            <p className="text-xs uppercase tracking-[0.35em] font-semibold" style={{ color: accentColor2 }}>Rules</p>
-            <h2 className="text-3xl font-bold font-display">General Competition Rules</h2>
+      {/* ── RULES ───────────────────────────────────────────────── */}
+      <section className="border-y border-border/50 py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <SectionReveal className="mb-8 md:mb-12">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-2" style={{ color: accent2 }}>Regulations</p>
+            <h2 className="text-2xl md:text-3xl font-bold font-display">Competition Rules</h2>
           </SectionReveal>
-          <div className="max-w-3xl mx-auto">
-            <div className="cultural-shell rounded-2xl p-8">
-              <ul className="space-y-4">
-                {GENERAL_RULES.map((rule, i) => (
-                  <SectionReveal key={i} delay={i * 0.05}>
-                    <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
-                        style={{ background: `${accentColor}20`, color: accentColor }}>{i + 1}</span>
-                      {rule}
-                    </li>
-                  </SectionReveal>
-                ))}
-              </ul>
-            </div>
+          <div className="grid sm:grid-cols-2 gap-3 md:gap-4 max-w-4xl">
+            {RULES.map((rule, i) => (
+              <SectionReveal key={i} delay={i * 0.05}>
+                <div className="flex items-start gap-3 md:gap-4 rounded-xl border border-border/50 p-4 md:p-5">
+                  <span className="text-[10px] font-bold shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ background: `${accent2}15`, color: accent2 }}>
+                    {i + 1}
+                  </span>
+                  <p className="text-xs text-muted-foreground leading-6">{rule}</p>
+                </div>
+              </SectionReveal>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="container py-20 text-center">
+      <section className="container px-4 md:px-6 py-16 md:py-24">
         <SectionReveal>
-          <h2 className="text-2xl font-bold mb-4">Ready to Showcase Your Culture?</h2>
-          <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto">
-            Join ICC 2026 and represent your cultural heritage on an international stage.
-          </p>
-          {registrationOpen ? (
-            <button onClick={handleRegister}
-              className="inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-bold hover:brightness-110 hover:scale-[1.02] transition-all"
-              style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor2})`, color: "#fff" }}>
-              Register Now
-            </button>
-          ) : (
-            <p className="text-muted-foreground text-sm">Registration is currently closed.</p>
-          )}
+          <div className="max-w-xl">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-4" style={{ color: accent }}>Join Us</p>
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4 leading-tight">
+              Ready to showcase<br />your culture?
+            </h2>
+            <p className="text-muted-foreground text-sm mb-8 leading-7">
+              Represent your cultural heritage on an international stage. ICC 2026 welcomes performers, communities, and cultural groups from around the world.
+            </p>
+            {registrationOpen ? (
+              <button onClick={handleRegister}
+                className="group inline-flex items-center gap-2 rounded-xl px-7 py-3.5 font-bold text-sm text-white hover:opacity-90 transition-all"
+                style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})` }}>
+                Register Now
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            ) : (
+              <p className="text-muted-foreground text-sm border border-border/60 rounded-xl px-5 py-3.5 inline-block">
+                Registration is currently closed.
+              </p>
+            )}
+          </div>
         </SectionReveal>
       </section>
 

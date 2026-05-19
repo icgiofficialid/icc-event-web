@@ -274,7 +274,7 @@ const IccIndex = () => {
       en: "A global stage celebrating traditional arts, ethnic identity, and cultural heritage through dance, costume, and vocal performance.",
       id: "Panggung global merayakan seni tradisional, identitas etnik, dan warisan budaya melalui tari, kostum, dan penampilan vokal.",
     },
-    registerBtn: { en: "Register Now",      id: "Daftar Sekarang" },
+    // registerBtn: { en: "Register Now",      id: "Daftar Sekarang" },
     allEvents:   { en: "All Events",        id: "Semua Event" },
     catTitle:    { en: "Competition Categories", id: "Kategori Kompetisi" },
     catSub:      { en: "Four performance categories celebrating the richness of global culture", id: "Empat kategori penampilan merayakan kekayaan budaya global" },
@@ -285,7 +285,7 @@ const IccIndex = () => {
   };
 
   // Slug untuk tombol Register Now — pakai event pertama, fallback ke /events
-  const firstEventSlug = upcomingEvents[0]?.slug;
+  // const firstEventSlug = upcomingEvents[0]?.slug;
 
   return (
     <IccShell>
@@ -440,7 +440,7 @@ const IccIndex = () => {
             className="flex items-center gap-3"
           >
             {/* Primary CTA — arah ke event pertama atau /events */}
-            <motion.button
+            {/* <motion.button
               onClick={() => firstEventSlug ? navigate(`/events/${firstEventSlug}`) : navigate("/events")}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
@@ -460,7 +460,7 @@ const IccIndex = () => {
               />
               <SnowflakeMark size={14} opacity={0.6} />
               {LABELS.registerBtn[lang]}
-            </motion.button>
+            </motion.button> */}
 
             <motion.button
               onClick={() => navigate("/events")}

@@ -87,6 +87,32 @@ export const EVENTS_REGISTRY: EventMeta[] = [
       },
     },
 
+
+        {
+      slug:                 "yicc-2026",
+      title:                "Yogyakarta International Cultural Competition",
+      subtitle:             "YICC 2026",
+      location:             "Yogyakarta, Indonesia",
+      dateRange:            "September 16–27, 2026",
+      registrationDeadline: "July 30, 2026",
+      status:               "upcoming",
+      registrationOpen:     false,
+      route:                "/events/yicc-2026",
+      shutdown:             false,
+      coverImage:          "https://res.cloudinary.com/dwhobhexj/image/upload/v1778213775/WhatsApp_Image_2026-05-08_at_11.12.59_nf00ax.jpg",
+      coverImageLandscape: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778214438/WhatsApp_Image_2026-05-08_at_11.26.51_jnzlti.jpg",
+
+      sheet: {
+        sheetUrl: "https://script.google.com/macros/s/AKfycbxfoz-AoQdSet82o8FeJliRekcg1vPHYj1s-6F1jRCmLWcOmjJ9xtY5rrLDBHOOD9AamA/exec",
+        targets: {
+          "indo-online":   "indo-online",
+          "indo-offline":  "indo-offline",
+          "inter-online":  "inter-online",
+          "inter-offline": "inter-offline",
+        },
+      },
+    },
+
     //-----------------------------------------------
 
   

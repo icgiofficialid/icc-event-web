@@ -12,6 +12,7 @@ import {
 import IccShell from "@/components/icc/IccShell";
 import SectionReveal from "@/components/icc/SectionReveal";
 import { useEvent } from "@/hooks/useEvents";
+import { getEventMeta } from "@/config/eventRegistry";
 
 interface Props { slug: string; }
 
@@ -182,7 +183,8 @@ const IccEventDetailPage = ({ slug }: Props) => {
   const accent2       = "#f59e0b";
   const coverGradient = event.coverGradient || "from-rose-950 via-fuchsia-950 to-amber-950";
   const tags          = event.tags ?? [];
-  const registrationOpen = !!event.registrationUrl;
+  const meta             = getEventMeta(slug);
+  const registrationOpen = !!meta?.registrationOpen;
 
   // Split title for gradient styling
   const words      = event.title.split(" ");

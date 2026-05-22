@@ -16,21 +16,22 @@ import { competitionCategories, goals, pageMeta } from "@/components/icc/iccData
 // ── ORGANIZED BY — tambah/hapus logo di sini ─────────────────────
 const ORGANIZER_LOGOS: { name: string; url: string; width?: number }[] = [
   {
-    name: "ICGI",
+    name: "Indonesian Centre for Giftedness Innovation (ICGI)",
     url: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778572483/Logo_ICGI_Bg_Transparant_1_rdvff1.png",
-    width: 120,
+    width: 100,
   },
   {
-    name: "IYSA",
+    name: "INDONESIAN YOUNG SCIENTIST ASSOCIATION (IYSA)",
     url: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778572483/logo_IYSA_bagus_e6uai3.png",
     width: 100,
   },
   {
-    name: "IPB University",
+    name: "Faculty of Engineering and Technology, IPB University",
     url: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778572483/Logo_IPB_1_bqies4.png",
-    width: 110,
+    width: 100,
   },
 ];
+
 
 // ── SNOWFLAKE LOGO ────────────────────────────────────────────────
 const SnowflakeMark = ({
@@ -153,9 +154,47 @@ const EventCard = ({ event, index }: { event: ICCEvent; index: number }) => {
 };
 
 //========== 0RGENIZED BY CAROUSEL — klik untuk lightbox ==========
+
 const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
-  const items = [...ORGANIZER_LOGOS, ...ORGANIZER_LOGOS];
   const [selected, setSelected] = useState<typeof ORGANIZER_LOGOS[0] | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Duplikasi cukup banyak agar selalu penuh layar
+  const items = [...ORGANIZER_LOGOS, ...ORGANIZER_LOGOS, ...ORGANIZER_LOGOS, ...ORGANIZER_LOGOS];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    // Lebar satu set logo (bukan duplikat)
+    const singleSetWidth = track.scrollWidth / 4;
+    let start: number | null = null;
+    let pos = 0;
+    let raf: number;
+    const speed = 0.5; // px per frame — naikkan untuk lebih cepat
+
+    const step = (ts: number) => {
+      if (start === null) start = ts;
+      pos += speed;
+      if (pos >= singleSetWidth) pos = 0; // reset ke titik awal seamlessly
+      track.style.transform = `translateX(-${pos}px)`;
+      raf = requestAnimationFrame(step);
+    };
+
+    raf = requestAnimationFrame(step);
+
+    // Pause on hover
+    const pause = () => cancelAnimationFrame(raf);
+    const resume = () => { raf = requestAnimationFrame(step); };
+    track.addEventListener("mouseenter", pause);
+    track.addEventListener("mouseleave", resume);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      track.removeEventListener("mouseenter", pause);
+      track.removeEventListener("mouseleave", resume);
+    };
+  }, []);
 
   return (
     <section className="relative py-16 md:py-24 overflow-hidden border-y border-border/30">
@@ -185,20 +224,19 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
         style={{ background: "linear-gradient(to left, hsl(var(--background)), transparent)" }}
       />
 
-      {/* Track carousel */}
-      <div className="relative overflow-hidden">
-        <motion.div
-          className="flex items-center gap-10 md:gap-16"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-          style={{ width: "max-content" }}
+      {/* Track — overflow hidden di wrapper, bukan track */}
+      <div className="overflow-hidden">
+        <div
+          ref={trackRef}
+          className="flex items-center gap-8 py-2"
+          style={{ width: "max-content", willChange: "transform" }}
         >
           {items.map((logo, i) => (
             <div
               key={i}
               onClick={() => setSelected(ORGANIZER_LOGOS[i % ORGANIZER_LOGOS.length])}
-              className="group flex items-center justify-center shrink-0 px-4 py-3 rounded-xl border border-border/30 bg-foreground/[0.03] transition-colors duration-300 relative cursor-pointer"
-              style={{ minWidth: 140, height: 72 }}
+              className="group flex items-center justify-center shrink-0 px-5 py-3 rounded-xl border border-border/30 bg-foreground/[0.03] hover:bg-foreground/[0.06] transition-colors duration-300 relative cursor-pointer"
+              style={{ minWidth: 150, height: 80 }}
             >
               <img
                 src={logo.url}
@@ -209,17 +247,17 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
                 style={{ maxHeight: 48, maxWidth: logo.width ?? 110 }}
               />
               <span
-                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-xs font-semibold tracking-widest uppercase text-foreground px-2 text-center"
+                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[9px] font-semibold tracking-wider uppercase text-foreground px-3 text-center pointer-events-none leading-tight"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 {logo.name}
               </span>
             </div>
           ))}
-        </motion.div>  {/* ← penutup motion.div carousel */}
-      </div>           {/* ← penutup div overflow-hidden */}
+        </div>
+      </div>
 
-      {/* Lightbox — di luar carousel track */}
+      {/* Lightbox */}
       <AnimatePresence>
         {selected && (
           <motion.div
@@ -230,7 +268,6 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
             onClick={() => setSelected(null)}
           >
             <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
-
             <motion.div
               initial={{ scale: 0.7, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -246,16 +283,13 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
               >
                 <X className="h-4 w-4" />
               </button>
-
               <img
                 src={selected.url}
                 alt={selected.name}
                 className="object-contain"
                 style={{ maxHeight: 120, maxWidth: 260 }}
               />
-
               <div className="h-px w-12 bg-foreground/20" />
-
               <p
                 className="text-lg font-semibold tracking-widest uppercase text-foreground text-center"
                 style={{ fontFamily: "'Cinzel', serif" }}
@@ -266,7 +300,6 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
           </motion.div>
         )}
       </AnimatePresence>
-
     </section>
   );
 };

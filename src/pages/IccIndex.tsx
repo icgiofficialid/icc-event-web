@@ -152,43 +152,37 @@ const EventCard = ({ event, index }: { event: ICCEvent; index: number }) => {
   );
 };
 
-
-// ── ORGANIZED BY CAROUSEL ─────────────────────────────────────────
+//========== 0RGENIZED BY CAROUSEL — klik untuk lightbox ==========
 const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
-  // Duplikasi untuk efek loop seamless
   const items = [...ORGANIZER_LOGOS, ...ORGANIZER_LOGOS];
+  const [selected, setSelected] = useState<typeof ORGANIZER_LOGOS[0] | null>(null);
 
   return (
     <section className="relative py-16 md:py-24 overflow-hidden border-y border-border/30">
-      {/* Background subtle */}
       <div className="absolute inset-0 bg-surface/20" />
 
       <div className="container relative z-10 mb-10 text-center space-y-3">
         <SectionReveal>
-          <h1
+          <h2
             className="text-2xl md:text-3xl font-semibold text-foreground mt-2"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
           >
             {lang === "id" ? "Mitra & Penyelenggara" : "Organized By"}
-          </h1>
+          </h2>
           <div className="flex justify-center mt-3">
             <div className="h-px w-12 bg-foreground/20" />
           </div>
         </SectionReveal>
       </div>
 
-      {/* Fade edge kiri & kanan */}
+      {/* Fade edge */}
       <div
         className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-        style={{
-          background: "linear-gradient(to right, hsl(var(--background)), transparent)",
-        }}
+        style={{ background: "linear-gradient(to right, hsl(var(--background)), transparent)" }}
       />
       <div
         className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-        style={{
-          background: "linear-gradient(to left, hsl(var(--background)), transparent)",
-        }}
+        style={{ background: "linear-gradient(to left, hsl(var(--background)), transparent)" }}
       />
 
       {/* Track carousel */}
@@ -196,20 +190,16 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
         <motion.div
           className="flex items-center gap-10 md:gap-16"
           animate={{ x: ["0%", "-50%"] }}
-          transition={{
-            duration: 28,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
           style={{ width: "max-content" }}
         >
           {items.map((logo, i) => (
             <div
               key={i}
-              className="group flex items-center justify-center shrink-0 px-4 py-3 rounded-xl border border-border/30 bg-foreground/[0.03] transition-colors duration-300 relative"
+              onClick={() => setSelected(ORGANIZER_LOGOS[i % ORGANIZER_LOGOS.length])}
+              className="group flex items-center justify-center shrink-0 px-4 py-3 rounded-xl border border-border/30 bg-foreground/[0.03] transition-colors duration-300 relative cursor-pointer"
               style={{ minWidth: 140, height: 72 }}
             >
-              {/* Logo — berwarna default, blur saat hover */}
               <img
                 src={logo.url}
                 alt={logo.name}
@@ -218,8 +208,6 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
                 className="object-contain transition-all duration-300 group-hover:opacity-20 group-hover:blur-sm"
                 style={{ maxHeight: 48, maxWidth: logo.width ?? 110 }}
               />
-
-              {/* Nama muncul saat hover */}
               <span
                 className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-xs font-semibold tracking-widest uppercase text-foreground px-2 text-center"
                 style={{ fontFamily: "'Cinzel', serif" }}
@@ -228,8 +216,57 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
               </span>
             </div>
           ))}
-        </motion.div>
-      </div>
+        </motion.div>  {/* ← penutup motion.div carousel */}
+      </div>           {/* ← penutup div overflow-hidden */}
+
+      {/* Lightbox — di luar carousel track */}
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelected(null)}
+          >
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 10 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              onClick={e => e.stopPropagation()}
+              className="relative z-10 flex flex-col items-center gap-6 rounded-2xl border border-border/40 bg-background p-10 md:p-14 shadow-2xl"
+              style={{ maxWidth: 420, width: "100%" }}
+            >
+              <button
+                onClick={() => setSelected(null)}
+                className="absolute top-4 right-4 rounded-lg p-1.5 hover:bg-foreground/8 transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <img
+                src={selected.url}
+                alt={selected.name}
+                className="object-contain"
+                style={{ maxHeight: 120, maxWidth: 260 }}
+              />
+
+              <div className="h-px w-12 bg-foreground/20" />
+
+              <p
+                className="text-lg font-semibold tracking-widest uppercase text-foreground text-center"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {selected.name}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </section>
   );
 };

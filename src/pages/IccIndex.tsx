@@ -13,6 +13,25 @@ import { useEvents } from "@/hooks/useEvents";
 import type { ICCEvent } from "@/lib/gasClient";
 import { competitionCategories, goals, pageMeta } from "@/components/icc/iccData";
 
+// ── ORGANIZED BY — tambah/hapus logo di sini ─────────────────────
+const ORGANIZER_LOGOS: { name: string; url: string; width?: number }[] = [
+  {
+    name: "ICGI",
+    url: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778572483/Logo_ICGI_Bg_Transparant_1_rdvff1.png",
+    width: 120,
+  },
+  {
+    name: "IYSA",
+    url: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778572483/logo_IYSA_bagus_e6uai3.png",
+    width: 100,
+  },
+  {
+    name: "IPB University",
+    url: "https://res.cloudinary.com/dwhobhexj/image/upload/v1778572483/Logo_IPB_1_bqies4.png",
+    width: 110,
+  },
+];
+
 // ── SNOWFLAKE LOGO ────────────────────────────────────────────────
 const SnowflakeMark = ({
   size = 120,
@@ -130,6 +149,88 @@ const EventCard = ({ event, index }: { event: ICCEvent; index: number }) => {
         </div>
       </motion.div>
     </SectionReveal>
+  );
+};
+
+
+// ── ORGANIZED BY CAROUSEL ─────────────────────────────────────────
+const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
+  // Duplikasi untuk efek loop seamless
+  const items = [...ORGANIZER_LOGOS, ...ORGANIZER_LOGOS];
+
+  return (
+    <section className="relative py-16 md:py-24 overflow-hidden border-y border-border/30">
+      {/* Background subtle */}
+      <div className="absolute inset-0 bg-surface/20" />
+
+      <div className="container relative z-10 mb-10 text-center space-y-3">
+        <SectionReveal>
+          <h1
+            className="text-2xl md:text-3xl font-semibold text-foreground mt-2"
+            style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
+          >
+            {lang === "id" ? "Mitra & Penyelenggara" : "Organized By"}
+          </h1>
+          <div className="flex justify-center mt-3">
+            <div className="h-px w-12 bg-foreground/20" />
+          </div>
+        </SectionReveal>
+      </div>
+
+      {/* Fade edge kiri & kanan */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+        style={{
+          background: "linear-gradient(to right, hsl(var(--background)), transparent)",
+        }}
+      />
+      <div
+        className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+        style={{
+          background: "linear-gradient(to left, hsl(var(--background)), transparent)",
+        }}
+      />
+
+      {/* Track carousel */}
+      <div className="relative overflow-hidden">
+        <motion.div
+          className="flex items-center gap-10 md:gap-16"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{
+            duration: 28,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          style={{ width: "max-content" }}
+        >
+          {items.map((logo, i) => (
+            <div
+              key={i}
+              className="group flex items-center justify-center shrink-0 px-4 py-3 rounded-xl border border-border/30 bg-foreground/[0.03] transition-colors duration-300 relative"
+              style={{ minWidth: 140, height: 72 }}
+            >
+              {/* Logo — berwarna default, blur saat hover */}
+              <img
+                src={logo.url}
+                alt={logo.name}
+                width={logo.width ?? 110}
+                height={48}
+                className="object-contain transition-all duration-300 group-hover:opacity-20 group-hover:blur-sm"
+                style={{ maxHeight: 48, maxWidth: logo.width ?? 110 }}
+              />
+
+              {/* Nama muncul saat hover */}
+              <span
+                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-xs font-semibold tracking-widest uppercase text-foreground px-2 text-center"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {logo.name}
+              </span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
   );
 };
 
@@ -604,6 +705,8 @@ const IccIndex = () => {
           })}
         </div>
       </section>
+      {/* ══ ORGANIZED BY ══ */}
+      <OrganizerCarousel lang={lang} />
 
       {/* ══ UPCOMING EVENTS ══ */}
       <section className="container min-h-screen flex flex-col justify-center py-20 md:py-28">

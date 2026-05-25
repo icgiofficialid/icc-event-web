@@ -12,6 +12,7 @@ import { useLang } from "@/components/LanguageProvider";
 import { useEvents } from "@/hooks/useEvents";
 import type { ICCEvent } from "@/lib/gasClient";
 import { competitionCategories, goals, pageMeta } from "@/components/icc/iccData";
+import { newsItems } from "@/config/newsData";
 
 // ── ORGANIZED BY — tambah/hapus logo di sini ─────────────────────
 const ORGANIZER_LOGOS: { name: string; url: string; width?: number }[] = [
@@ -92,14 +93,15 @@ const EventCard = ({ event, index }: { event: ICCEvent; index: number }) => {
           }}
         >
           <div
-            className="relative aspect-[3/4] flex flex-col justify-between p-5"
+            className="relative flex flex-col justify-between p-4 md:p-5"
             style={{
+              minHeight: "280px",
               background: `
                 radial-gradient(ellipse at 25% 15%, rgba(255,200,80,0.28) 0%, transparent 50%),
                 radial-gradient(ellipse at 75% 80%, rgba(200,40,60,0.35) 0%, transparent 50%),
                 linear-gradient(160deg, #1a1208 0%, #100a0a 50%, #0e0509 100%)
               `,
-            }}
+            }} 
           >
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <SnowflakeMark size={130} opacity={0.05} className="text-amber-300" />
@@ -127,10 +129,10 @@ const EventCard = ({ event, index }: { event: ICCEvent; index: number }) => {
             <div className="relative z-10 space-y-1.5">
               <div className="w-6 h-px bg-white/25 mb-3" />
               <p className="text-white/45 text-[9px] uppercase tracking-[0.28em] font-semibold">{event.subtitle}</p>
-              <h3
-                className="text-white text-base font-medium leading-snug"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}
-              >{event.title}</h3>
+                <h3
+                  className="text-white text-sm md:text-base font-medium leading-snug"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}
+                >{event.title}</h3>
               <div className="pt-1 space-y-1">
                 <div className="flex items-center gap-1.5">
                   <MapPin className="h-2.5 w-2.5 text-white/40 shrink-0" />
@@ -203,7 +205,7 @@ const OrganizerCarousel = ({ lang }: { lang: "en" | "id" }) => {
       <div className="container relative z-10 mb-10 text-center space-y-3">
         <SectionReveal>
           <h2
-            className="text-2xl md:text-3xl font-semibold text-foreground mt-2"
+            className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground mt-2"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
           >
             {lang === "id" ? "Mitra & Penyelenggara" : "Organized By"}
@@ -319,7 +321,7 @@ const EventPopup = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.97 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-6 right-4 sm:right-6 z-50 w-64 sm:w-72"
+      className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 sm:w-72"
     >
       <div
         className="rounded-2xl overflow-hidden"
@@ -521,7 +523,7 @@ const IccIndex = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-foreground/15 bg-foreground/5 px-5 py-2 text-[11px] uppercase tracking-[0.3em] font-semibold text-foreground/70">
+            <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1.5 md:px-5 md:py-2 text-[9px] md:text-[11px] uppercase tracking-[0.2em] md:tracking-[0.3em] font-semibold text-foreground/70 text-center max-w-[260px] md:max-w-none leading-tight">
               <SnowflakeMark size={11} opacity={0.7} />
               {LABELS.heroEyebrow[lang]}
             </div>
@@ -538,7 +540,7 @@ const IccIndex = () => {
             <h1
               style={{
                 fontFamily: "'Cinzel', serif",
-                fontSize: "clamp(6rem, 22vw, 18rem)",
+                fontSize: "clamp(3.5rem, 16vw, 18rem)",
                 fontWeight: 700,
                 lineHeight: 0.92,
                 letterSpacing: "0.06em",
@@ -548,7 +550,7 @@ const IccIndex = () => {
               <LetterReveal text="ICC" delay={0.3} />
             </h1>
 
-            <div className="flex items-center gap-3 mt-3">
+            <div className="hidden sm:flex items-center gap-3 mt-3">
               <motion.div
                 className="h-px"
                 style={{ background: "linear-gradient(to right, transparent, hsl(var(--foreground) / 0.3))" }}
@@ -599,7 +601,7 @@ const IccIndex = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="text-sm md:text-base leading-7 max-w-md mx-auto text-muted-foreground"
+            className="text-xs md:text-base leading-7 max-w-[280px] md:max-w-md mx-auto text-muted-foreground px-2"
           >
             {LABELS.heroSub[lang]}
           </motion.p>
@@ -679,7 +681,7 @@ const IccIndex = () => {
               {meta.eyebrow[lang]}
             </p>
             <h2
-              className="text-3xl md:text-4xl font-semibold text-foreground"
+              className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
             >
               {meta.title[lang]}
@@ -692,7 +694,7 @@ const IccIndex = () => {
             </p>
           </SectionReveal>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             {goals.map((goal, i) => {
               const icons = [Globe, Heart, Users, Star];
               const Icon = icons[i % icons.length];
@@ -701,7 +703,7 @@ const IccIndex = () => {
                   <motion.div
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.22 }}
-                    className="cultural-shell rounded-2xl p-5 flex items-start gap-4"
+                    className="cultural-shell rounded-2xl p-4 md:p-5 flex items-start gap-3 md:gap-4"
                   >
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border border-foreground/12 bg-foreground/5">
                       <Icon className="h-4 w-4 text-foreground/60" />
@@ -722,7 +724,7 @@ const IccIndex = () => {
             YICC 2026
           </p>
           <h2
-            className="text-3xl md:text-4xl font-semibold text-foreground"
+            className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
           >
             {LABELS.catTitle[lang]}
@@ -733,7 +735,7 @@ const IccIndex = () => {
           <p className="text-muted-foreground text-sm max-w-md mx-auto">{LABELS.catSub[lang]}</p>
         </SectionReveal>
 
-        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {competitionCategories.map((cat, i) => {
             const Icon = cat.icon;
             return (
@@ -741,7 +743,7 @@ const IccIndex = () => {
                 <motion.article
                   whileHover={{ y: -8 }}
                   transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                  className="cultural-shell rounded-2xl p-6 h-full flex flex-col cursor-pointer group relative overflow-hidden"
+                  className="cultural-shell rounded-2xl p-4 md:p-6 h-full flex flex-col cursor-pointer group relative overflow-hidden"
                 >
                   <div className="absolute -top-5 -right-5 pointer-events-none text-foreground" style={{ opacity: 0.04 }}>
                     <SnowflakeMark size={90} opacity={1} />
@@ -786,7 +788,7 @@ const IccIndex = () => {
               What's Coming
             </p>
             <h2
-              className="text-3xl md:text-4xl font-semibold text-foreground"
+              className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
             >
               {LABELS.eventsTitle[lang]}
@@ -814,12 +816,70 @@ const IccIndex = () => {
             {LABELS.noEvents[lang]}
           </SectionReveal>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {upcomingEvents.map((event, i) => (
               <EventCard key={event.id} event={event} index={i} />
             ))}
           </div>
         )}
+      </section>
+
+          {/* ── SECTION 4: LATEST NEWS ──────────────────────────────── */}
+      <section className="container pb-20 md:pb-28">
+        <SectionReveal className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <svg width="10" height="10" viewBox="0 0 40 40" fill="none">
+                <path d="M20 0 L22.5 17.5 L40 20 L22.5 22.5 L20 40 L17.5 22.5 L0 20 L17.5 17.5 Z" fill="#F59E0B"/>
+              </svg>
+              <p className="text-xs uppercase tracking-[0.35em] text-amber-400 font-semibold">Latest Updates</p>
+            </div>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">News & Announcements</h2>
+          </div>
+          <button
+            onClick={() => navigate("/news")}
+            className="self-start sm:self-auto flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+          >
+            All news <ArrowRight className="h-4 w-4" />
+          </button>
+        </SectionReveal>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {newsItems.slice(0, 3).map((item, i) => (
+            <SectionReveal key={item.slug} delay={i * 0.08} className="h-full">
+              <motion.article
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => navigate(`/news/${item.slug}`)}
+                className="tech-shell rounded-2xl overflow-hidden cursor-pointer group h-full flex flex-col"
+              >
+                <div className="h-28 md:h-36 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center overflow-hidden">
+                  {item.coverImage ? (
+                    <img src={item.coverImage} alt={item.title} className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <svg className="w-8 h-8 text-primary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary border border-primary/30 rounded-full px-2.5 py-0.5">
+                      {item.category}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">{item.date}</span>
+                  </div>
+                  <h3 className="font-bold text-foreground text-sm leading-snug mb-2 group-hover:text-primary transition-colors flex-1">
+                    {item.title}
+                  </h3>
+                  <div className="flex items-center gap-1 text-xs text-primary font-semibold mt-2">
+                    Read more <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </motion.article>
+            </SectionReveal>
+          ))}
+        </div>
       </section>
 
       {/* Popup — hanya muncul jika ada event */}

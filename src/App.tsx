@@ -22,6 +22,9 @@ import Curation       from "./pages/Curation.tsx";
 import Terms          from "@/pages/data/Terms.tsx";
 import Guide          from "@/pages/guide";
 import NotFound       from "./pages/NotFound.tsx";
+import News from "@/pages/News";
+import NewsDetailPage from "@/pages/NewsDetailPage";
+
 
 // Event detail — dynamic by slug
 import IccEventDetailPage from "./pages/events/IccEventDetailPage";
@@ -60,6 +63,8 @@ const App = () => (
               <Route path="/guide"       element={<Guide />} />
               <Route path="/register"    element={<IccRegister />} />
               <Route path="*"            element={<NotFound />} />
+              <Route path="/news"         element= {<News />} />
+              <Route path="/news/:slug"         element= {<NewsDetailPage />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

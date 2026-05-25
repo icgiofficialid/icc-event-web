@@ -321,72 +321,56 @@ const EventPopup = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.97 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 sm:w-72"
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:right-6 sm:bottom-6 z-50 w-max max-w-[92vw]"
     >
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: "#ffffff",
-          border: "1px solid rgba(0,0,0,0.10)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)",
-        }}
-      >
-        <div
-          className="h-[3px]"
-          style={{
-            background: "linear-gradient(90deg, #f59e0b 0%, #ef4444 60%, transparent 100%)",
-          }}
-        />
-        <div
-          className="p-4 cursor-pointer group"
-          onClick={() => { navigate(`/events/${event.slug}`); onClose(); }}
+<div
+      onClick={() => { navigate(`/events/${event.slug}`); onClose(); }}
+      className="cursor-pointer group flex items-center gap-3 rounded-full px-4 py-3"
+      style={{
+        background: "#ffffff",
+        border: "1px solid rgba(0,0,0,0.10)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06)",
+      }}
+    >
+      {/* dot */}
+      <span className="relative flex h-2 w-2 shrink-0">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#ef4444" }} />
+        <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "#ef4444" }} />
+      </span>
+
+      {/* teks */}
+      <div className="flex flex-col leading-tight">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-bold" style={{ color: "#9ca3af" }}>
+          New Event
+        </span>
+        <span
+          className="text-sm font-semibold"
+          style={{ fontFamily: "'Cormorant Garamond', serif", color: "#111827", fontWeight: 600 }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#ef4444" }} />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#ef4444" }} />
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: "#6b7280" }}>New Event</span>
-            </div>
-            <button
-              onClick={e => { e.stopPropagation(); onClose(); }}
-              className="rounded-lg p-1 transition-colors hover:bg-gray-100"
-              style={{ color: "#9ca3af" }}
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "#9ca3af" }}>
-              {event.type} · {event.year ?? new Date().getFullYear()}
-            </p>
-            <p
-              className="text-xl font-semibold leading-tight"
-              style={{ fontFamily: "'Cormorant Garamond', serif", color: "#111827", fontWeight: 600 }}
-            >
-              {event.subtitle || event.title}
-            </p>
-            <p className="text-xs" style={{ color: "#6b7280" }}>{event.location}</p>
-          </div>
-
-          <div
-            className="mt-3 pt-3 flex items-center justify-between"
-            style={{ borderTop: "1px solid #f3f4f6" }}
-          >
-            <span className="text-[11px] font-semibold" style={{ color: "#111827" }}>
-              Registration open
-            </span>
-            <span
-              className="flex items-center gap-1 text-[11px] font-medium transition-all group-hover:gap-2"
-              style={{ color: "#6b7280" }}
-            >
-              View <ArrowRight className="h-3 w-3" />
-            </span>
-          </div>
-        </div>
+          {event.subtitle || event.title}
+        </span>
       </div>
+
+      {/* separator */}
+      <div className="h-6 w-px mx-1 shrink-0" style={{ background: "#e5e7eb" }} />
+
+      {/* view */}
+      <span
+        className="flex items-center gap-1 text-[11px] font-semibold shrink-0 group-hover:gap-2 transition-all"
+        style={{ color: "#6b7280" }}
+      >
+        View <ArrowRight className="h-3 w-3" />
+      </span>
+
+      {/* close */}
+      <button
+        onClick={e => { e.stopPropagation(); onClose(); }}
+        className="rounded-full p-1 hover:bg-gray-100 transition-colors shrink-0 ml-1"
+        style={{ color: "#9ca3af" }}
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </div>
     </motion.div>
   );
 };
@@ -454,7 +438,6 @@ const IccIndex = () => {
     eventsTitle: { en: "Upcoming Events",   id: "Event Mendatang" },
     noEvents:    { en: "No events found.",  id: "Tidak ada event." },
     loading:     { en: "Loading events...", id: "Memuat events..." },
-    scrollLabel: { en: "Scroll",            id: "Gulir" },
   };
 
   // Slug untuk tombol Register Now — pakai event pertama, fallback ke /events
@@ -652,9 +635,6 @@ const IccIndex = () => {
           transition={{ delay: 1.8, duration: 0.8 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
-          <span className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-            {LABELS.scrollLabel[lang]}
-          </span>
           <motion.div
             className="w-px h-10 bg-gradient-to-b from-foreground/30 to-transparent"
             animate={{ scaleY: [1, 0.4, 1], opacity: [0.5, 1, 0.5] }}
